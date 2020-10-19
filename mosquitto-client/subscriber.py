@@ -19,7 +19,7 @@ def on_message(client, userdata, msg):
     mensagem_b = str(msg.payload.decode("utf-8","ignore"))
     mensagem_json = json.loads(mensagem_b)
     print(mensagem_json)
-    print(mensagem_json['Tensao'])
+    print(mensagem_json['tensao'])
 
 def main():
     mqtt_client = mqtt.Client()
