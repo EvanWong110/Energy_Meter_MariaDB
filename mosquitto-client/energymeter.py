@@ -21,7 +21,7 @@ def on_message(client, userdata, msg):
     print(j_data)
 
     cnx = mysql.connector.connect(user='admin', password='password',
-                              host='localhost',
+                              host='192.168.0.251',
                               database='energymeter')
     cursor=cnx.cursor()
 
