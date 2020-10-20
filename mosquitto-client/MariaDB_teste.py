@@ -1,6 +1,6 @@
 import mysql.connector
 
-cnx = mysql.connector.connect(user='admin', password='cristian86',
+cnx = mysql.connector.connect(user='admin', password='password',
                               host='localhost',
                               database='energymeter')
 
