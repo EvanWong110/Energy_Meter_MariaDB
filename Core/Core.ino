@@ -15,7 +15,7 @@
 #include "ADE7753CR/ADE7753CR.h"
 
 typedef struct {
-    char id[20] = "";
+    char id[20] = "0";
     long timestamp = 0;
     float tensao = 0;
     float corrente = 0;
@@ -136,16 +136,16 @@ void loop() {
 
     if (threadTo(&last_upload_time, time_between_uploads)) {         // Faz upload das informações mais recentes
         piscaled(2, 50);
-        strcpy(atual.id, $id);
-        atual.tensao = retV();
-        atual.frequencia = retHz();
-        atual.corrente = retI();
+     //   strcpy(atual.id, $id);
+     //   atual.tensao = retV();
+      //  atual.frequencia = retHz();
+    //    atual.corrente = retI();
 //        atual.FP = retFP();
 //        atual.pot_at = retW();
 //        atual.pot_re = retVAr();
 //        atual.pot_ap = retVA();
-        atual.timestamp = setClock();
-        displayUpdate(&display_current_view);
+       // atual.timestamp = setClock();
+  //      displayUpdate(&display_current_view);
         createMessage(msg_to_publish, atual);
         publish_message(msg_to_publish);
     }

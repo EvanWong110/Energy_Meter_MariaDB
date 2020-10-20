@@ -230,7 +230,7 @@ the analog inputs V1P and V1N are connected to ADC 2.
 
 //INTERRUPTS REGISTERS 16bits
 #define AEHF   0b0000000000000001 // Indicates that an interrupt occurred because the active energy register, AENERGY, is more than half full. 
-#define SAG    0b0000000000000010 // Indicates that an interrupt was caused by a SAG on the line voltage. 
+#define SAG_    0b0000000000000010 // Indicates that an interrupt was caused by a SAG on the line voltage. 
 #define CYCEND 0b0000000000000100
 /* Indicates the end of energy accumulation over an integer number of half line cycles as defined by
 the content of the LINECYC register

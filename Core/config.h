@@ -84,7 +84,7 @@ const char* ntp_secondary = "time.nist.gov";
 const int columns_number=9;
 
 void createMessage(char * msg_to_publish, mensagem atual) {
-
+Serial.println("Creating message: ");
 char buff[1000] = "";
 int ponteiro;
 int soma_ponteiros = 0;
