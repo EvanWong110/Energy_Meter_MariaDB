@@ -1,5 +1,5 @@
 /*
-  ADE7753.CR.h - Library for use with ADE7753.
+  ADE7753CR.h - Library for use with ADE7753.
   Created by Cristian F. Ritter, Octuber 18, 2020.
   Released into the public domain.
 */
@@ -13,9 +13,9 @@
 
 void ADE7753::Init(int CSpin)
 {
-  SPI.begin();
-  pinMode(CSpin, OUTPUT);
-  _CSpin = CSpin;
+    SPI.begin();
+    pinMode(CSpin, OUTPUT);
+    _CSpin = CSpin;
 }
 
 void ADE7753::Closes()
@@ -23,8 +23,57 @@ void ADE7753::Closes()
  SPI.endTransaction();
 }
 
+void DisableADConverters(){
+    SetBits(MODE, ASUSPEND);
+}
+
+void EnableADConverters(){
+    UnsetBits(MODE, ASUSPEND);
+}
+
+void StartTemperatureMeasurement(){
+    SetBits(MODE, TEMPSEL);
+}
+
+void SoftReset(){
+    SetBits(MODE, SWRST)
+    delaymicroseconds(18);
+}
+
+void EnableAcummulationMode(){
+   SetBits(MODE, CYCMODE); 
+}
+
+void DisableAcummulationMode(){
+   UnsetBits(MODE, CYCMODE); 
+}
+
+void DisableCH1(){  
+    SetBits(MODE, DISCH1);
+}
+
+void DisableCH2(){
+    SetBits(MODE, DISCH2);
+}
+
+void EnableCH1(){
+    UnsetBits(MODE, DISCH1);
+}
+
+void EnableCH2(){
+    UnsetBits(MODE, DISCH2);
+}
+
+void DisableSwap(){
+    UnsetBits(MODE, SWAP);
+}
+
+void EnableSwap(){
+    SetBits(MODE, SWAP);
+}
+  
 char ResetaStatusReg(){
-    read16(RSTSTATUS)
+    return read16(RSTSTATUS)
 }
 
 float ReadVRMS(){  //returns a % of full range [0.5Vin]
@@ -65,6 +114,14 @@ void ADE7753::Enable()
 void ADE7753::Disable()
 {
   digitalWrite(CSpin,HIGH);  
+}
+
+void SetBits(unsigned long REG, unsigned long CONFIG){
+    Write16(REG, Read16(REG) | CONFIG)
+}
+
+void UnsetBits(unsigned long REG, unsigned long CONFIG){
+    Write16(REG, Read16(REG) & ~CONFIG)
 }
 
 unsigned long ADE7753::read8(unsigned long reg){

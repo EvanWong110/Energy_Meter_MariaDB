@@ -1,5 +1,5 @@
 /*
-  ADE7753.CR.h - Library for use with ADE7753.
+  ADE7753CR.h - Library for use with ADE7753.
   Created by Cristian F. Ritter, Octuber 18, 2020.
   Released into the public domain.
 */
@@ -228,9 +228,10 @@ the analog inputs V1P and V1N are connected to ADC 2.
 */
 #define POAM     0b1000000000000000 //Writing Logic 1 to this bit allows only positive active power to be accumulated in the ADE7753.
 
+
 //INTERRUPTS REGISTERS 16bits
 #define AEHF   0b0000000000000001 // Indicates that an interrupt occurred because the active energy register, AENERGY, is more than half full. 
-#define SAG_    0b0000000000000010 // Indicates that an interrupt was caused by a SAG on the line voltage. 
+#define SAG    0b0000000000000010 // Indicates that an interrupt was caused by a SAG on the line voltage. 
 #define CYCEND 0b0000000000000100
 /* Indicates the end of energy accumulation over an integer number of half line cycles as defined by
 the content of the LINECYC register
@@ -267,30 +268,49 @@ class ADE7753
 {
   public:
     void Init(int CSpin);
-    void Closes();
+    void Closes();/
+    void EnableSAGDetection(); 
+    void DisableSAGDetection();   
+    void DisableADConverters();
+    void EnableADConverters();
+    void StartTemperatureMeasurement();
+    void SoftReset();
+    void EnableAcummulationMode();
+    void DisableAcummulationMode();
+    void DisableCH1(); //Puts inputs internally in short
+    void DisableCH2();
+    void EnableCH1();
+    void EnableCH2();
+    void DisableSwap();
+    void EnableSwap();
+    
     char ResetaStatusReg();
     float ReadVRMS();
     float ReadIRMS();
     float ReadPERIOD();
+
     
   private:
     int _CSpin;
     void Enables();
     void Disables();
+    void SetBits();
+    void UnsetBits();
     unsigned long Read8();
     unsigned long Read16();
     unsigned long Read24();
     void Write8();
     void Write16();
     int WaitZeroCross();
-    /*
+    
     typedef struct {
       float tensao = 0;
       float corrente = 0;
       float frequencia = 0;
       float pot_at = 0;
       float pot_re = 0;
-    } data;
+      float FP;
+    } measurement;
     */
 };
 
