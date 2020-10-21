@@ -277,7 +277,7 @@ class ADE7753
 {
   public:
     //ADE7753();
-    void initt(void);
+    void Init(int CSpin);
     void Closes();
     void EnableHPF();
     void DisableHPF();  
@@ -361,20 +361,20 @@ class ADE7753
     char ResetaStatusReg();
     float ReadVRMS();
     float ReadIRMS();
-    float ReadPERIOD();
+    float ReadPERIOD(int CLKIN);
 
     
   private:
     int _CSpin;
-    void Enables();
-    void Disables();
-    void SetBits();
-    void UnsetBits();
-    unsigned long Read8();
-    unsigned long Read16();
-    unsigned long Read24();
-    void Write8();
-    void Write16();
+    void Enable();
+    void Disable();
+    void SetBits(char reg, unsigned long value);
+    void UnsetBits(char reg, unsigned long value);
+    unsigned long Read8(char reg);
+    unsigned long Read16(char reg);
+    unsigned long Read24(char reg);
+    void Write8(char reg, unsigned long value);
+    void Write16(char reg, unsigned long value);
     int WaitZeroCross();
     
     typedef struct {

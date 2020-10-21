@@ -13,9 +13,9 @@
 #include <time.h>             // Biblioteca com funções relacionadas a fuso horário
 #include <PubSubClient.h>     // Biblioteca para publicacao MQTT na AWS
 //#include "funcoes_ADE7753.h"  // funcões dos registradores ADE7753
-#include "ADE7753CR/ADE7753CR.h"
+#include "ADE7753CR.h"
 
-ADE7753 meter;
+ADE7753 ADE7753;
 
 
 typedef struct {
@@ -57,7 +57,8 @@ void setup()
   pinMode(LEDPIN, OUTPUT);
   SPI.begin();                           // Inicia comunicação SPI
 //  configADE();                           // Configura registradores do ADE7753
-meter.initt();
+
+ADE7753.Init(D8);
 }
 
 unsigned long last_upload_time = 0;         // Uso interno nos threads
@@ -142,7 +143,7 @@ void loop() {
         piscaled(2, 50);
      //   strcpy(atual.id, $id);
      //   atual.tensao = retV();
-      //atual.tensao = meter.ReadVRMS();
+      atual.tensao = ADE7753.ReadVRMS();
       //  atual.frequencia = retHz();
     //    atual.corrente = retI();
 //        atual.FP = retFP();

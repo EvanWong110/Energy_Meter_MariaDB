@@ -9,15 +9,14 @@
 #include "SPI.h"
 
 
-//ADE7753::ADE7753() {
 
-}
 //public
 
-void ADE7753::initt(void)
+void ADE7753::Init(int CSpin)
 {
-//    SPI.begin();
-//    pinMode(D8, OUTPUT);
+    _CSpin = CSpin;
+    SPI.begin();
+    pinMode(_CSpin, OUTPUT);
 }
 
 void ADE7753::Closes()
@@ -49,11 +48,11 @@ void ADE7753::DisableCF(){
     SetBits(MODE, DISCF);
 }
 void ADE7753::EnableSAGDetection(){
-    UnsetBits(DISSAG);
+    UnsetBits(MODE, DISSAG);
 } 
 
 void ADE7753::DisableSAGDetection(){
-    SetBits(DISSAG);
+    SetBits(MODE, DISSAG);
 }
 
 void ADE7753::DisableADConverters(){
@@ -69,8 +68,8 @@ void ADE7753::StartTemperatureMeasurement(){
 }
 
 void ADE7753::SoftReset(){
-    SetBits(MODE, SWRST)
-    delaymicroseconds(18);
+    SetBits(MODE, SWRST);
+    delayMicroseconds(18);
 }
 
 void ADE7753::EnableAcummulationMode(){
@@ -126,7 +125,7 @@ void ADE7753::SelectWaveformDataRate(int datarate){
 }
 
 void ADE7753::SelectWaveformDataSource(int datasource){
-    switch (datarate)
+    switch (datasource)
     {
     case 2:
         UnsetBits(MODE, WAVSEL10);
@@ -152,81 +151,107 @@ void ADE7753::DisableOnlyPositive(){
 void ADE7753::EnableIRQActiveEnergyHalfFull(){
     SetBits(IRQEN, AEHF);
 }
+
 void ADE7753::DisableIRQActiveEnergyHalfFull(){
     UnsetBits(IRQEN, AEHF);
 }
+
 void ADE7753::EnableIRQSAG(){
     SetBits(IRQEN, SAG);
 }
+
 void ADE7753::DisableIRQSAG(){
     UnsetBits(IRQEN, SAG);
 }
+
 void ADE7753::EnableIRQCycleEnergyAcumulationEnd(){
     SetBits(IRQEN, CYCEND);   
 }
+
 void ADE7753::DisableIRQCycleEnergyAcumulationEnd(){
     UnsetBits(IRQEN, CYCEND);   
 }
+
 void ADE7753::EnableIRQNewWaveformData(){
     SetBits(IRQEN, WSMP);   
 }
+
 void ADE7753::DisableIRQNewWaveformData(){
     UnsetBits(IRQEN, WSMP);   
 }
+
 void ADE7753::EnableIRQZeroCrossing(){
     SetBits(IRQEN, ZX);   
 }
+
 void ADE7753::DisableIRQZeroCrossing(){
     UnsetBits(IRQEN, ZX);   
 }
+
 void ADE7753::EnableIRQTemperatureResults(){
     SetBits(IRQEN, TEMP);   
 }
+
 void ADE7753::DisableIRQTemperatureResults(){
     UnsetBits(IRQEN, TEMP);   
 }
+
 void ADE7753::EnableIRQActiveEnergyOverflow(){
     SetBits(IRQEN, AEOF);   
 }
+
 void ADE7753::DisableIRQActiveEnergyOverflow(){
     UnsetBits(IRQEN, AEOF);   
 }
+
 void ADE7753::EnableIRQCH2VlvlPeek(){
     SetBits(IRQEN, PKV);   
 }
+
 void ADE7753::DisableIRQCH2VlvlPeek(){
     UnsetBits(IRQEN, PKV);   
 }
+
 void ADE7753::EnableIRQCH1IlvlPeek(){
     SetBits(IRQEN, PKI);   
 }
+
 void ADE7753::DisableIRQCH1IlvlPeek(){
     UnsetBits(IRQEN, PKI);   
 }
+
 void ADE7753::EnableIRQAparentEnergyHalfFull(){
     SetBits(IRQEN, VAEHF);   
 }
+
 void ADE7753::DisableIRQAparentEnergyHalfFull(){
     UnsetBits(IRQEN, VAEHF);   
 }
+
 void ADE7753::EnableIRQAparentEnergyOverflow(){
     SetBits(IRQEN, VAEOF);   
 }
+
 void ADE7753::DisableIRQAparentEnergyOverflow(){
     UnsetBits(IRQEN, VAEOF);   
 }
+
 void ADE7753::EnableIRQZeroCrossingTimeout(){
     SetBits(IRQEN, ZXTO);   
 }
+
 void ADE7753::DisableIRQZeroCrossingTimeout(){
     UnsetBits(IRQEN, ZXTO);   
 }
+
 void ADE7753::EnablesIRQPowerChangeToPos(){
     SetBits(IRQEN, PPOS);   
 }
+
 void ADE7753::DisablesIRQPowerChangeToPos(){
     UnsetBits(IRQEN, PPOS);   
 }
+
 void ADE7753::EnablesIRQPowerChangeToNeg(){
     SetBits(IRQEN, PNEG);   
 }
@@ -238,74 +263,87 @@ void ADE7753::DisablesIRQPowerChangeToNeg(){
 bool ADE7753::CheckActiveEnergyHalfFull(){
     return(Read16(STATUS) & AEHF);
 }
+
 bool ADE7753::CheckSAG(){
     return(Read16(STATUS) & SAG);
 }
+
 bool ADE7753::CheckCycleEnergyAcumulationEnd(){
     return(Read16(STATUS) & CYCEND);
 }
+
 bool ADE7753::CheckNewWaveformData(){
     return(Read16(STATUS) & WSMP);
 }
+
 bool ADE7753::CheckZeroCrossing(){
     return(Read16(STATUS) & ZX);
 }
+
 bool ADE7753::CheckTemperatureResults(){
     return(Read16(STATUS) & TEMP);
 }
+
 bool ADE7753::CheckActiveEnergyOverflow(){
     return(Read16(STATUS) & AEOF);
 }
+
 bool ADE7753::CheckCH2VlvlPeek(){
     return(Read16(STATUS) & PKV);
 }
+
 bool ADE7753::CheckCH1IlvlPeek(){
     return(Read16(STATUS) & PKI);
 }
+
 bool ADE7753::CheckAparentEnergyHalfFull(){
     return(Read16(STATUS) & VAEHF);
 }
+
 bool ADE7753::CheckAparentEnergyOverflow(){
     return(Read16(STATUS) & VAEOF);
 }
+
 bool ADE7753::CheckZeroCrossingTimeout(){
     return(Read16(STATUS) & ZXTO);
 }
+
 bool ADE7753::CheckPowerChangeToPos(){
     return(Read16(STATUS) & PPOS);
 }
+
 bool ADE7753::CheckPowerChangeToNeg(){
     return(Read16(STATUS) & PNEG);
 }
 
 char ADE7753::ResetaStatusReg(){
-    return read16(RSTSTATUS)
+    return Read16(RSTSTATUS);
 }
 
 float ADE7753::ReadVRMS(){  //returns a % of full range [0.5Vin]
     unsigned long reg_value;
-    float calculado;
-    aguardapassagemporzero();
-    reg_value = read24(VRMS);
+    float percent;
+    WaitZeroCross();
+    reg_value = Read24(VRMS);
     Serial.print("VRMS BIN Value: ");
     Serial.println(reg_value,BIN);
-    calculado = (reg_value/1561400)*100;
-    return calculado;
+    percent = (reg_value/1561400)*100;
+    return percent;
 }
   
 float ADE7753::ReadIRMS(){
     unsigned long reg_value;
-    float calculado;
-    aguardapassagemporzero();
-    reg_value = read24(IRMS);
-    calculado = (reg_value /1868467)*100;   //returns a % of full range [0.5Vin]
-    return calculado;
+    float percent;
+    WaitZeroCross();
+    reg_value = Read24(IRMS);
+    percent = (reg_value /1868467)*100;   //returns a % of full range [0.5Vin]
+    return percent;
 }
 
 float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
     unsigned long reg_value;
     float period;
-    reg_value = read16(PERIOD);
+    reg_value = Read16(PERIOD);
     period = (8*reg_value)/CLKIN;
     return period;
 }
@@ -314,49 +352,49 @@ float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
 
 void ADE7753::Enable()
 {
-  digitalWrite(CSpin,LOW);  
+    digitalWrite(_CSpin,LOW);  
 }
 
 void ADE7753::Disable()
 {
-  digitalWrite(CSpin,HIGH);  
+    digitalWrite(_CSpin,HIGH);  
 }
 
-void ADE7753::SetBits(unsigned long REG, unsigned long CONFIG){
-    Write16(REG, Read16(REG) | CONFIG)
+void ADE7753::SetBits(char reg, unsigned long value){
+    Write16(reg, Read16(reg) | value);
 }
 
-void ADE7753::UnsetBits(unsigned long REG, unsigned long CONFIG){
-    Write16(REG, Read16(REG) & ~CONFIG)
+void ADE7753::UnsetBits(char reg, unsigned long value){
+    Write16(reg, Read16(reg) & value);
 }
 
-unsigned long ADE7753::read8(unsigned long reg){
-    enables();
-    unsigned char b0;
+unsigned long ADE7753::Read8(char reg){
+    Enable();
+    char b0;
     SPI.transfer(reg);
     delayMicroseconds(5);
     b0=SPI.transfer(0x81);
     delayMicroseconds(150);
-    disables();
+    Disable();
     return (unsigned long)b0;
 }
     
-unsigned long ADE7753::read16(unsigned long reg){
-    enables();
-    unsigned char b1,b0;
+unsigned long ADE7753::Read16(char reg){
+    Enable();
+    char b1,b0;
     SPI.transfer(reg);
     delayMicroseconds(5);
     b1=SPI.transfer(0x81); //DUMMY BITS
     delayMicroseconds(5);
     b0=SPI.transfer(0x81);
     delayMicroseconds(50);
-    disables();
+    Disable();
     return ((unsigned long)b1<<8 | (unsigned long)b0);            
 }
 
-unsigned long ADE7753::read24(unsigned long reg){
-    enables();
-    unsigned char b2,b1,b0;
+unsigned long ADE7753::Read24(char reg){
+    Enable();
+    char b2,b1,b0;
     SPI.transfer(reg);
     delayMicroseconds(5);
     b2=SPI.transfer(0x81);
@@ -365,35 +403,36 @@ unsigned long ADE7753::read24(unsigned long reg){
     delayMicroseconds(5);
     b0=SPI.transfer(0x81);
     delayMicroseconds(50);
-    disables();
+    Disable();
     return ((unsigned long)b2<<16 | (unsigned long)b1<<8 | (unsigned long)b0);            
 }
-void ADE7753::Write8(unsigned long reg, unsigned long value){
-    enables();
+void ADE7753::Write8(char reg, unsigned long value){
+    Enable();
     SPI.transfer( (reg | 0b10000000) );  // utilizado para colocar 1 no MSB indicando gravacao no registrador
     delayMicroseconds(5);
     SPI.transfer(value); 
     delayMicroseconds(50);
-    disables();
+    Disable();
 }
-void ADE7753::Write16(unsigned long reg, unsigned long value){
-    enables();
+void ADE7753::Write16(char reg, unsigned long value){
+    Enable();
     SPI.transfer( (reg | 0b10000000) );  //colocar 1 no MSB indica gravacao no registrador
     delayMicroseconds(5);
     SPI.transfer(value>>8); //envia os 8 bits mais significativos
     delayMicroseconds(5);
     SPI.transfer(value&0xFF); //envia os 8 bits menos significativos
     delayMicroseconds(50);
-    disables();
+    Disable();
 }
-void ADE7753::WaitZeroCross(){  //returns 0 when ZeroCross
+int ADE7753::WaitZeroCross(){  //returns 0 when ZeroCross
     unsigned long value = 1;
     unsigned long conta_millis = millis();
     while (!value) {
         if (millis() > conta_millis+100) 
             break; 
-        value = (0b10000 & read16(STATUS));    
+        value = (0b10000 & Read16(STATUS));    
     }
+    return value;
 }
 
 
