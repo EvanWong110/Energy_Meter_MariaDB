@@ -8,10 +8,7 @@
 #include "ADE7753CR.h"
 #include "SPI.h"
 
-
-
 //public
-
 void ADE7753::Init(int CSpin)
 {
     _CSpin = CSpin;
@@ -22,7 +19,7 @@ void ADE7753::Init(int CSpin)
 
 void ADE7753::Closes()
 {
- SPI.endTransaction();
+    SPI.endTransaction();
 }
 
 void ADE7753::EnableHPF(){
@@ -74,11 +71,11 @@ void ADE7753::SoftReset(){
 }
 
 void ADE7753::EnableAcummulationMode(){
-   SetBits(MODE, CYCMODE); 
+    SetBits(MODE, CYCMODE); 
 }
 
 void ADE7753::DisableAcummulationMode(){
-   UnsetBits(MODE, CYCMODE); 
+    UnsetBits(MODE, CYCMODE); 
 }
 
 void ADE7753::DisableCH1(){  
@@ -329,6 +326,7 @@ float ADE7753::ReadVRMS(){  //returns a % of full range [0.5Vin]
     Serial.print("VRMS BIN Value: ");
     Serial.println(reg_value,BIN);
     percent = (reg_value/1561400)*100;
+    Serial.print(percent);
     return percent;
 }
   
@@ -407,6 +405,7 @@ unsigned long ADE7753::Read24(char reg){
     Disable();
     return ((unsigned long)b2<<16 | (unsigned long)b1<<8 | (unsigned long)b0);            
 }
+
 void ADE7753::Write8(char reg, unsigned long value){
     Enable();
     SPI.transfer( (reg | 0b10000000) );  // utilizado para colocar 1 no MSB indicando gravacao no registrador
@@ -415,6 +414,7 @@ void ADE7753::Write8(char reg, unsigned long value){
     delayMicroseconds(50);
     Disable();
 }
+
 void ADE7753::Write16(char reg, unsigned long value){
     Enable();
     SPI.transfer( (reg | 0b10000000) );  //colocar 1 no MSB indica gravacao no registrador
@@ -425,6 +425,7 @@ void ADE7753::Write16(char reg, unsigned long value){
     delayMicroseconds(50);
     Disable();
 }
+
 int ADE7753::WaitZeroCross(){  //returns 0 when ZeroCross
     unsigned long value = 1;
     unsigned long conta_millis = millis();
