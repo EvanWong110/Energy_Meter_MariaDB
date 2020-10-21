@@ -9,13 +9,15 @@
 #include "SPI.h"
 
 
+//ADE7753::ADE7753() {
+
+}
 //public
 
-void ADE7753::Init(int CSpin)
+void ADE7753::initt(void)
 {
-    SPI.begin();
-    pinMode(CSpin, OUTPUT);
-    _CSpin = CSpin;
+//    SPI.begin();
+//    pinMode(D8, OUTPUT);
 }
 
 void ADE7753::Closes()
@@ -23,60 +25,264 @@ void ADE7753::Closes()
  SPI.endTransaction();
 }
 
-void DisableADConverters(){
+void ADE7753::EnableHPF(){
+    UnsetBits(MODE, DISHPF);
+}
+
+void ADE7753::DisableHPF(){
+    SetBits(MODE, DISHPF);
+}
+
+void ADE7753::EnableLPF2(){
+    UnsetBits(MODE, DISLPF2);
+}
+
+void ADE7753::DisableLPF2(){
+    SetBits(MODE, DISLPF2);
+}
+
+void ADE7753::EnableCF(){
+    UnsetBits(MODE, DISCF);
+}
+
+void ADE7753::DisableCF(){
+    SetBits(MODE, DISCF);
+}
+void ADE7753::EnableSAGDetection(){
+    UnsetBits(DISSAG);
+} 
+
+void ADE7753::DisableSAGDetection(){
+    SetBits(DISSAG);
+}
+
+void ADE7753::DisableADConverters(){
     SetBits(MODE, ASUSPEND);
 }
 
-void EnableADConverters(){
+void ADE7753::EnableADConverters(){
     UnsetBits(MODE, ASUSPEND);
 }
 
-void StartTemperatureMeasurement(){
+void ADE7753::StartTemperatureMeasurement(){
     SetBits(MODE, TEMPSEL);
 }
 
-void SoftReset(){
+void ADE7753::SoftReset(){
     SetBits(MODE, SWRST)
     delaymicroseconds(18);
 }
 
-void EnableAcummulationMode(){
+void ADE7753::EnableAcummulationMode(){
    SetBits(MODE, CYCMODE); 
 }
 
-void DisableAcummulationMode(){
+void ADE7753::DisableAcummulationMode(){
    UnsetBits(MODE, CYCMODE); 
 }
 
-void DisableCH1(){  
+void ADE7753::DisableCH1(){  
     SetBits(MODE, DISCH1);
 }
 
-void DisableCH2(){
+void ADE7753::DisableCH2(){
     SetBits(MODE, DISCH2);
 }
 
-void EnableCH1(){
+void ADE7753::EnableCH1(){
     UnsetBits(MODE, DISCH1);
 }
 
-void EnableCH2(){
+void ADE7753::EnableCH2(){
     UnsetBits(MODE, DISCH2);
 }
 
-void DisableSwap(){
+void ADE7753::DisableSwap(){
     UnsetBits(MODE, SWAP);
 }
 
-void EnableSwap(){
+void ADE7753::EnableSwap(){
     SetBits(MODE, SWAP);
 }
-  
-char ResetaStatusReg(){
+
+void ADE7753::SelectWaveformDataRate(int datarate){
+    switch (datarate)
+    {
+    case 1:
+        UnsetBits(MODE, DTRT10);
+        SetBits(MODE, DTRT10_01);
+        break;
+    case 2:
+        UnsetBits(MODE, DTRT10);
+        SetBits(MODE, DTRT10_10);
+        break;
+    case 3:
+        SetBits(MODE, DTRT10_11);
+        break;
+    default:
+        UnsetBits(MODE, DTRT10);
+        break;
+    }
+}
+
+void ADE7753::SelectWaveformDataSource(int datasource){
+    switch (datarate)
+    {
+    case 2:
+        UnsetBits(MODE, WAVSEL10);
+        SetBits(MODE, WAVSEL10_10);
+        break;
+    case 3:
+        SetBits(MODE, WAVSEL10_11);
+        break;
+    default:
+        UnsetBits(MODE, WAVSEL10);
+        break;
+    }
+}    
+    
+void ADE7753::EnableOnlyPositive(){
+    SetBits(MODE, POAM);
+}
+
+void ADE7753::DisableOnlyPositive(){
+    UnsetBits(MODE, POAM);
+}
+
+void ADE7753::EnableIRQActiveEnergyHalfFull(){
+    SetBits(IRQEN, AEHF);
+}
+void ADE7753::DisableIRQActiveEnergyHalfFull(){
+    UnsetBits(IRQEN, AEHF);
+}
+void ADE7753::EnableIRQSAG(){
+    SetBits(IRQEN, SAG);
+}
+void ADE7753::DisableIRQSAG(){
+    UnsetBits(IRQEN, SAG);
+}
+void ADE7753::EnableIRQCycleEnergyAcumulationEnd(){
+    SetBits(IRQEN, CYCEND);   
+}
+void ADE7753::DisableIRQCycleEnergyAcumulationEnd(){
+    UnsetBits(IRQEN, CYCEND);   
+}
+void ADE7753::EnableIRQNewWaveformData(){
+    SetBits(IRQEN, WSMP);   
+}
+void ADE7753::DisableIRQNewWaveformData(){
+    UnsetBits(IRQEN, WSMP);   
+}
+void ADE7753::EnableIRQZeroCrossing(){
+    SetBits(IRQEN, ZX);   
+}
+void ADE7753::DisableIRQZeroCrossing(){
+    UnsetBits(IRQEN, ZX);   
+}
+void ADE7753::EnableIRQTemperatureResults(){
+    SetBits(IRQEN, TEMP);   
+}
+void ADE7753::DisableIRQTemperatureResults(){
+    UnsetBits(IRQEN, TEMP);   
+}
+void ADE7753::EnableIRQActiveEnergyOverflow(){
+    SetBits(IRQEN, AEOF);   
+}
+void ADE7753::DisableIRQActiveEnergyOverflow(){
+    UnsetBits(IRQEN, AEOF);   
+}
+void ADE7753::EnableIRQCH2VlvlPeek(){
+    SetBits(IRQEN, PKV);   
+}
+void ADE7753::DisableIRQCH2VlvlPeek(){
+    UnsetBits(IRQEN, PKV);   
+}
+void ADE7753::EnableIRQCH1IlvlPeek(){
+    SetBits(IRQEN, PKI);   
+}
+void ADE7753::DisableIRQCH1IlvlPeek(){
+    UnsetBits(IRQEN, PKI);   
+}
+void ADE7753::EnableIRQAparentEnergyHalfFull(){
+    SetBits(IRQEN, VAEHF);   
+}
+void ADE7753::DisableIRQAparentEnergyHalfFull(){
+    UnsetBits(IRQEN, VAEHF);   
+}
+void ADE7753::EnableIRQAparentEnergyOverflow(){
+    SetBits(IRQEN, VAEOF);   
+}
+void ADE7753::DisableIRQAparentEnergyOverflow(){
+    UnsetBits(IRQEN, VAEOF);   
+}
+void ADE7753::EnableIRQZeroCrossingTimeout(){
+    SetBits(IRQEN, ZXTO);   
+}
+void ADE7753::DisableIRQZeroCrossingTimeout(){
+    UnsetBits(IRQEN, ZXTO);   
+}
+void ADE7753::EnablesIRQPowerChangeToPos(){
+    SetBits(IRQEN, PPOS);   
+}
+void ADE7753::DisablesIRQPowerChangeToPos(){
+    UnsetBits(IRQEN, PPOS);   
+}
+void ADE7753::EnablesIRQPowerChangeToNeg(){
+    SetBits(IRQEN, PNEG);   
+}
+
+void ADE7753::DisablesIRQPowerChangeToNeg(){
+    UnsetBits(IRQEN, PNEG);   
+}
+
+bool ADE7753::CheckActiveEnergyHalfFull(){
+    return(Read16(STATUS) & AEHF);
+}
+bool ADE7753::CheckSAG(){
+    return(Read16(STATUS) & SAG);
+}
+bool ADE7753::CheckCycleEnergyAcumulationEnd(){
+    return(Read16(STATUS) & CYCEND);
+}
+bool ADE7753::CheckNewWaveformData(){
+    return(Read16(STATUS) & WSMP);
+}
+bool ADE7753::CheckZeroCrossing(){
+    return(Read16(STATUS) & ZX);
+}
+bool ADE7753::CheckTemperatureResults(){
+    return(Read16(STATUS) & TEMP);
+}
+bool ADE7753::CheckActiveEnergyOverflow(){
+    return(Read16(STATUS) & AEOF);
+}
+bool ADE7753::CheckCH2VlvlPeek(){
+    return(Read16(STATUS) & PKV);
+}
+bool ADE7753::CheckCH1IlvlPeek(){
+    return(Read16(STATUS) & PKI);
+}
+bool ADE7753::CheckAparentEnergyHalfFull(){
+    return(Read16(STATUS) & VAEHF);
+}
+bool ADE7753::CheckAparentEnergyOverflow(){
+    return(Read16(STATUS) & VAEOF);
+}
+bool ADE7753::CheckZeroCrossingTimeout(){
+    return(Read16(STATUS) & ZXTO);
+}
+bool ADE7753::CheckPowerChangeToPos(){
+    return(Read16(STATUS) & PPOS);
+}
+bool ADE7753::CheckPowerChangeToNeg(){
+    return(Read16(STATUS) & PNEG);
+}
+
+char ADE7753::ResetaStatusReg(){
     return read16(RSTSTATUS)
 }
 
-float ReadVRMS(){  //returns a % of full range [0.5Vin]
+float ADE7753::ReadVRMS(){  //returns a % of full range [0.5Vin]
     unsigned long reg_value;
     float calculado;
     aguardapassagemporzero();
@@ -87,7 +293,7 @@ float ReadVRMS(){  //returns a % of full range [0.5Vin]
     return calculado;
 }
   
-float ReadIRMS(){
+float ADE7753::ReadIRMS(){
     unsigned long reg_value;
     float calculado;
     aguardapassagemporzero();
@@ -96,7 +302,7 @@ float ReadIRMS(){
     return calculado;
 }
 
-float ReadPERIOD(int CLKIN){  //returns period in seconds
+float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
     unsigned long reg_value;
     float period;
     reg_value = read16(PERIOD);
@@ -116,11 +322,11 @@ void ADE7753::Disable()
   digitalWrite(CSpin,HIGH);  
 }
 
-void SetBits(unsigned long REG, unsigned long CONFIG){
+void ADE7753::SetBits(unsigned long REG, unsigned long CONFIG){
     Write16(REG, Read16(REG) | CONFIG)
 }
 
-void UnsetBits(unsigned long REG, unsigned long CONFIG){
+void ADE7753::UnsetBits(unsigned long REG, unsigned long CONFIG){
     Write16(REG, Read16(REG) & ~CONFIG)
 }
 
@@ -162,7 +368,7 @@ unsigned long ADE7753::read24(unsigned long reg){
     disables();
     return ((unsigned long)b2<<16 | (unsigned long)b1<<8 | (unsigned long)b0);            
 }
-void Write8(unsigned long reg, unsigned long value){
+void ADE7753::Write8(unsigned long reg, unsigned long value){
     enables();
     SPI.transfer( (reg | 0b10000000) );  // utilizado para colocar 1 no MSB indicando gravacao no registrador
     delayMicroseconds(5);
@@ -170,7 +376,7 @@ void Write8(unsigned long reg, unsigned long value){
     delayMicroseconds(50);
     disables();
 }
-void Write16(unsigned long reg, unsigned long value){
+void ADE7753::Write16(unsigned long reg, unsigned long value){
     enables();
     SPI.transfer( (reg | 0b10000000) );  //colocar 1 no MSB indica gravacao no registrador
     delayMicroseconds(5);
@@ -180,7 +386,7 @@ void Write16(unsigned long reg, unsigned long value){
     delayMicroseconds(50);
     disables();
 }
-void WaitZeroCross(){  //returns 0 when ZeroCross
+void ADE7753::WaitZeroCross(){  //returns 0 when ZeroCross
     unsigned long value = 1;
     unsigned long conta_millis = millis();
     while (!value) {

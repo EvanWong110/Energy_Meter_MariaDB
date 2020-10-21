@@ -120,7 +120,7 @@ void publish_message(char* msg_to_publish){   //Publica a string no serviço da 
     client.endPublish();
     Serial.println("");
 }
-
+/*
 void configADE(){
    write16(MODE, MODE_VALUE_16BITS);
    write16(IRQEN, IRQEN_VALUE_16BITS);              
@@ -128,7 +128,7 @@ void configADE(){
 // write16(IRMSOS, IRMSOS_VALUE_12BITS);            //offset canal 1 tensao
 // write16(VRMSOS, VRMSOS_VALUE_12BITS);            //offset canal 2 tensao
    }
-
+*/
 void ler_serial(char * mensagem){
    char message[100];
    int charsRead = 0;

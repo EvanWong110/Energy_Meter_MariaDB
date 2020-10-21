@@ -1,18 +1,22 @@
-/* * Nome do arquivo: Core.h
+/* Nome do arquivo: Core.ino
  * Este é o arquivo main() que possui o setup e o loop principal do programa
  * 
  * Feito por Cristian Fernando Ritter
  * Para o trabalho de conclusão de curso de Engenharia Mecatrônica IfSC - Florianópolis
  * Todos os direitos reservados
  */
+#define CS_PIN D8                  // SPI Pin
 
 #include <ESP8266WiFi.h>      // Bibliote de suporte a wifi do módulo ESP8266
 #include <SPI.h>              // Biblioteca de suporte a comunicação SPI
 #include "SSD1306Wire.h"      // Bibliote de suporte ao Display OLED
 #include <time.h>             // Biblioteca com funções relacionadas a fuso horário
 #include <PubSubClient.h>     // Biblioteca para publicacao MQTT na AWS
-#include "funcoes_ADE7753.h"  // funcões dos registradores ADE7753
+//#include "funcoes_ADE7753.h"  // funcões dos registradores ADE7753
 #include "ADE7753CR/ADE7753CR.h"
+
+ADE7753 meter;
+
 
 typedef struct {
     char id[20] = "0";
@@ -24,7 +28,6 @@ typedef struct {
     float pot_re = 0;
     float pot_ap = 0;
     float FP = 0;
-    bool SAG = 0;
     bool sobretensao = 0;
     bool sobrecorrente = 0;
     bool crossing_timeout = 0;
@@ -53,7 +56,8 @@ void setup()
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LEDPIN, OUTPUT);
   SPI.begin();                           // Inicia comunicação SPI
-  configADE();                           // Configura registradores do ADE7753
+//  configADE();                           // Configura registradores do ADE7753
+meter.initt();
 }
 
 unsigned long last_upload_time = 0;         // Uso interno nos threads
@@ -87,25 +91,25 @@ void verificar_comando_serial(){
          long int value_int = strtol(value, 0, 2);
                   
          if (arg1 == "write16"){
-             write16(reg_int, value_int);
+//             write16(reg_int, value_int);
          }
          if (arg1 == "write8"){
-             write8(reg_int, value_int);
+//             write8(reg_int, value_int);
          }
          if (arg1 == "read24"){
-             Serial.print(registers[reg_int-1]);
+//             Serial.print(registers[reg_int-1]);
              Serial.print(" => ");
-             Serial.println(read24(reg_int),BIN);
+//             Serial.println(read24(reg_int),BIN);
          }
          if (arg1 == "read16"){
-             Serial.print(registers[reg_int-1]);
+//             Serial.print(registers[reg_int-1]);
              Serial.print(" => ");
-             Serial.println(read16(reg_int),BIN);
+//             Serial.println(read16(reg_int),BIN);
          }
          if (arg1 == "read8"){
-            Serial.print(registers[reg_int-1]);
+//            Serial.print(registers[reg_int-1]);
             Serial.print(" => ");
-            Serial.println(read8(reg_int),BIN);
+//            Serial.println(read8(reg_int),BIN);
          }
 
       }
@@ -138,6 +142,7 @@ void loop() {
         piscaled(2, 50);
      //   strcpy(atual.id, $id);
      //   atual.tensao = retV();
+      //atual.tensao = meter.ReadVRMS();
       //  atual.frequencia = retHz();
     //    atual.corrente = retI();
 //        atual.FP = retFP();

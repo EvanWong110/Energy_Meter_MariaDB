@@ -3,8 +3,8 @@
   Created by Cristian F. Ritter, Octuber 18, 2020.
   Released into the public domain.
 */
-#ifndef ADE7753CR_h
-#define ADE7753CR_h
+#ifndef ADE7753CR_H
+#define ADE7753CR_H
 
 #include "Arduino.h"
 
@@ -190,27 +190,26 @@ number of the silicon.
 #define DISLPF2  0b0000000000000010 // LPF (low-pass filter) after the multiplier (LPF2) is disabled when this bit is set. 
 #define DISCF    0b0000000000000100 // Frequency output CF is disabled when this bit is set
 #define DISSAG   0b0000000000001000 // Line voltage sag detection is disabled when this bit is set. 
-#define ASUSPEND 0b0000000000010000 
 /* By setting this bit to Logic 1, both ADE7753 A/D converters can be turned off.
 In normal operation, this bit should be left at Logic 0. All digital functionality can be
 stopped by suspending the clock signal at CLKIN pin. 
 */
-#define TEMPSEL  0b0000000000100000
+#define ASUSPEND 0b0000000000010000 
 /* Temperature conversion starts when this bit is set to 1. This bit is automatically reset to 0
 when the temperature conversion is finished. 
 */
-#define SWRST    0b0000000001000000
+#define TEMPSEL  0b0000000000100000
 /* Software Chip Reset. A data transfer should not take place to the ADE7753 for at least
 18 μs after a software reset. 
 */
+#define SWRST    0b0000000001000000
 #define CYCMODE  0b0000000010000000 // Setting this bit to Logic 1 places the chip into line cycle energy accumulation mode. 
 #define DISCH1   0b0000000100000000 // ADC 1 (Channel 1) inputs are internally shorted together. 
 #define DISCH2   0b0000001000000000 // ADC 2 (Channel 2) inputs are internally shorted together. 
-#define SWAP     0b0000010000000000
 /* By setting this bit to Logic 1 the analog inputs V2P and V2N are connected to ADC 1 and
 the analog inputs V1P and V1N are connected to ADC 2. 
 */
-#define DTRT10   0b0001100000000000
+#define SWAP     0b0000010000000000
 /* These bits are used to select the waveform register update rate.
     |  DTRT1 |DTRT0  |  Update Rate              |
     |  0     | 0     |  27.9 kSPS (CLKIN/128)    |
@@ -218,7 +217,12 @@ the analog inputs V1P and V1N are connected to ADC 2.
     |  1     | 0     |   7 kSPS (CLKIN/512)      |
     |  1     | 1     |   3.5 kSPS (CLKIN/1024)   | 
 */
-#define WAVSEL10 0b0110000000000000
+#define DTRT10      0b0001100000000000
+#define DTRT10_00   0b0000000000000000 //27.9 kSPS (CLKIN/128)
+#define DTRT10_01   0b0000100000000000 //14 kSPS (CLKIN/256)
+#define DTRT10_10   0b0001000000000000 // 7 kSPS (CLKIN/512)
+#define DTRT10_11   0b0001100000000000 //3.5 kSPS (CLKIN/1024)
+
 /* These bits are used to select the source of the sampled data for the waveform register.
     | WAVSEL1,0  | Length | Source
     | 0          | 0      | 24 bits active power signal (output of LPF2)
@@ -226,6 +230,11 @@ the analog inputs V1P and V1N are connected to ADC 2.
     | 1          | 0      | 24 bits Channel 1
     | 1          | 1      | 24 bits Channel 2 
 */
+#define WAVSEL10    0b0110000000000000
+#define WAVSEL10_00 0b0000000000000000
+#define WAVSEL10_10 0b0100000000000000
+#define WAVSEL10_11 0b0110000000000000
+
 #define POAM     0b1000000000000000 //Writing Logic 1 to this bit allows only positive active power to be accumulated in the ADE7753.
 
 
@@ -267,8 +276,15 @@ number of line cycles—see the Zero-Crossing Timeout section.
 class ADE7753
 {
   public:
-    void Init(int CSpin);
-    void Closes();/
+    //ADE7753();
+    void initt(void);
+    void Closes();
+    void EnableHPF();
+    void DisableHPF();  
+    void EnableLPF2();
+    void DisableLPF2();
+    void EnableCF();
+    void DisableCF();
     void EnableSAGDetection(); 
     void DisableSAGDetection();   
     void DisableADConverters();
@@ -283,6 +299,64 @@ class ADE7753
     void EnableCH2();
     void DisableSwap();
     void EnableSwap();
+    /*
+    0 -> 27.9 kSPS [Default]
+    1 -> 14   kSPS
+    2 ->  7   kSPS
+    3 ->  3.5 kSPS
+    */
+    void SelectWaveformDataRate(int datarate);  
+    /*
+    0 -> 24 bits active power signal (output of LPF2) [Default]
+    2 -> 24 bits Channel 1
+    3 -> 24 bits Channel 2
+    */
+    void SelectWaveformDataSource(int datasource);  
+    void EnableOnlyPositive();
+    void DisableOnlyPositive();
+    void EnableIRQActiveEnergyHalfFull();
+    void DisableIRQActiveEnergyHalfFull();
+    void EnableIRQSAG();
+    void DisableIRQSAG();
+    void EnableIRQCycleEnergyAcumulationEnd();
+    void DisableIRQCycleEnergyAcumulationEnd();
+    void EnableIRQNewWaveformData();
+    void DisableIRQNewWaveformData();
+    void EnableIRQZeroCrossing();
+    void DisableIRQZeroCrossing();
+    void EnableIRQTemperatureResults();
+    void DisableIRQTemperatureResults();
+    void EnableIRQActiveEnergyOverflow();
+    void DisableIRQActiveEnergyOverflow();
+    void EnableIRQCH2VlvlPeek();
+    void DisableIRQCH2VlvlPeek();
+    void EnableIRQCH1IlvlPeek();
+    void DisableIRQCH1IlvlPeek();
+    void EnableIRQAparentEnergyHalfFull();
+    void DisableIRQAparentEnergyHalfFull();
+    void EnableIRQAparentEnergyOverflow();
+    void DisableIRQAparentEnergyOverflow();
+    void EnableIRQZeroCrossingTimeout();
+    void DisableIRQZeroCrossingTimeout();
+    void EnablesIRQPowerChangeToPos();
+    void DisablesIRQPowerChangeToPos();
+    void EnablesIRQPowerChangeToNeg();
+    void DisablesIRQPowerChangeToNeg();
+
+    bool CheckActiveEnergyHalfFull();
+    bool CheckSAG();
+    bool CheckCycleEnergyAcumulationEnd();
+    bool CheckNewWaveformData();
+    bool CheckZeroCrossing();
+    bool CheckTemperatureResults();
+    bool CheckActiveEnergyOverflow();
+    bool CheckCH2VlvlPeek();
+    bool CheckCH1IlvlPeek();
+    bool CheckAparentEnergyHalfFull();
+    bool CheckAparentEnergyOverflow();
+    bool CheckZeroCrossingTimeout();
+    bool CheckPowerChangeToPos();
+    bool CheckPowerChangeToNeg();
     
     char ResetaStatusReg();
     float ReadVRMS();
@@ -311,7 +385,6 @@ class ADE7753
       float pot_re = 0;
       float FP;
     } measurement;
-    */
 };
 
 #endif
