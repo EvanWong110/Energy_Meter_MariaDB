@@ -15,8 +15,9 @@
 void ADE7753::Init(int CSpin)
 {
     _CSpin = CSpin;
-    SPI.begin();
     pinMode(_CSpin, OUTPUT);
+    SPI.begin();
+    SPI.beginTransaction (SPISettings (4000000, MSBFIRST, SPI_MODE1));
 }
 
 void ADE7753::Closes()

@@ -5,7 +5,7 @@
  * Para o trabalho de conclusão de curso de Engenharia Mecatrônica IfSC - Florianópolis
  * Todos os direitos reservados
  */
-#define CS_PIN D8                  // SPI Pin
+//#define CS_PIN D8                  // SPI Pin
 
 #include <ESP8266WiFi.h>      // Bibliote de suporte a wifi do módulo ESP8266
 #include <SPI.h>              // Biblioteca de suporte a comunicação SPI
@@ -51,7 +51,7 @@ void setup()
   connect_MQTT();
   setClock();                            // atualiza hora do sistema (para a autenticar o certificado e gerar o timestamp)
   pinMode(SW_DISPLAY, INPUT);            
-  pinMode(CS_PIN,OUTPUT);                
+//  pinMode(CS_PIN,OUTPUT);                
 //  digitalWrite(CS_PIN, HIGH);            // habilita comunicação no ADE7753 - disabled by default
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LEDPIN, OUTPUT);
