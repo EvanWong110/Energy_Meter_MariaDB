@@ -13,7 +13,7 @@
         public:
            // void Init(int SDApin, int SCKpin);
             void ShowMessage(char* message);
-            int ShowCompleteView(char* data);
+            void ShowCompleteView(char* data);
         private:
     };
 

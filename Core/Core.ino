@@ -272,12 +272,11 @@ void loop() {
    if (!digitalRead(SW_DISPLAY) && threadTo(&last_debaunce_time, debaunce_time)) {      
       display_current_view++;       
 //      displayUpdate(&display_current_view);                 // Muda tela do display
-      ADE7753.DisplayBufferCreator(1, atual); //salva dados no buffer "Parameter=value"
-      char teste[30] = "ola=testando";
-      OLED.ShowCompleteView(teste);  //shows buffer content on display 
-   }
+        }
 
    if (threadTo(&last_upload_time, time_between_uploads)) {         // Faz upload das informações mais recentes
+      ADE7753.DisplayBufferCreator(1, &atual); //salva dados no buffer "Parameter=value"
+      OLED.ShowCompleteView(atual.display_buffer);  //shows buffer content on display 
       piscaled(2, 50);
       //  strcpy(atual.id, $id);
       atual.voltage = ADE7753.ReadVRMS();

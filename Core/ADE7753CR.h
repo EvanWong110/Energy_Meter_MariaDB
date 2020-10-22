@@ -379,7 +379,7 @@
       float ReadVRMS();
       float ReadIRMS();
       float ReadPERIOD(int CLKIN);
-      void DisplayBufferCreator(int view, Measurement data);  
+      void DisplayBufferCreator(int view, Measurement* data);  
       
       
     private:
