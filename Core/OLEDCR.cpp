@@ -6,13 +6,8 @@
 
 #include "OLEDCR.h"
 
-#define SDApin D1
-#define SCKpin D2
-
-SSD1306Wire display(0x3c, SDApin, SCKpin);
 
 void OLED::Init(){
-   // SSD1306Wire OledDisp(0x3c, SDApin, SCKpin);
    display.init();
    display.flipScreenVertically();
    display.clear();

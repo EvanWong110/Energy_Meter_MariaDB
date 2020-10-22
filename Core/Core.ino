@@ -10,9 +10,9 @@
 #include <SPI.h>              // Biblioteca de suporte a comunicação SPI
 #include "SSD1306Wire.h"      // Bibliote de suporte ao Display OLED
 #include <time.h>             // Biblioteca com funções relacionadas a fuso horário
-#include <PubSubClient.h>     // Biblioteca para publicacao MQTT na AWS
 #include "ADE7753CR.h"
 #include "OLEDCR.h"
+#include "publisher.h"
 
 #define SDA_PIN      D1                 // display Pin
 #define SCK_PIN      D2                 // display Pin
@@ -30,23 +30,23 @@ const char* wifi_password = "07111993"; // WiFi network password
 char* mqtt_server = "192.168.000.251";  // IP of the MQTT broker
 const char* mqtt_username = "energymeter"; // MQTT username
 const char* mqtt_password = "energymeter"; // MQTT password
-const char* mqtt_topic = "home/energymeter";
 const char* clientID = "client_livingroom"; // MQTT client ID
 const char* ntp_primary = "pool.ntp.org";     // Servidores de fuso horário
 const char* ntp_secondary = "time.nist.gov";
+//const int columns_number=9;
 unsigned long last_upload_time = 0;         // Uso interno nos threads
 unsigned long last_debaunce_time = 0;              
 char msg_to_publish[1000];                 // Armazena a string a ser enviada para o broker
-//unsigned long status_register = 0;         // Armazena o valor do registrador de status do ADE
-//int display_current_view = 0;              // Armazena a informacao da tela apresentada no display
+unsigned long status_register = 0;         // Armazena o valor do registrador de status do ADE
+int display_current_view = 0;              // Armazena a informacao da tela apresentada no display
 
-
-//SSD1306Wire display(0x3c, SDA_PIN, SCK_PIN);
 ADE7753 ADE7753;
 OLED OLED;
 ADE7753::Measurement atual;
-WiFiClient wifiClient;
+SSD1306Wire display(0x3c, SDA_PIN, SCK_PIN);
 PubSubClient client(mqtt_server, 1883, wifiClient); 
+WiFiClient wifiClient;
+Publisher Publisher;
 
 void connect_WIFI(){
   Serial.print("Connecting to ");
@@ -76,7 +76,6 @@ boolean threadTo(unsigned long* last_time, unsigned long default_time) {  //cria
     else 
         return false;  
 }
-
 long setClock() {        // Set time via NTP, as required for x.509 validation  
   configTime(0 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   Serial.print("Waiting for NTP time sync: ");
@@ -90,44 +89,18 @@ long setClock() {        // Set time via NTP, as required for x.509 validation
   return now;  
 }
 
-void createMessage(char * msg_to_publish, ADE7753::Measurement atual) {
-Serial.println("Creating message: ");
-char buff[1000] = "";
-int ponteiro;
-int soma_ponteiros = 0;
-ponteiro = snprintf(buff, 50, "{\n");
-soma_ponteiros += ponteiro;
-ponteiro = snprintf(buff+soma_ponteiros, 50, "\"id\" : \"%s\",\n", atual.id);
-soma_ponteiros += ponteiro;
-ponteiro = snprintf(buff+soma_ponteiros, 50, "\"timestamp\" : \"%d\",\n", atual.timestamp);
-soma_ponteiros += ponteiro;
-ponteiro = snprintf(buff+soma_ponteiros, 50, "\"tensao\" : \"%f\",\n", atual.voltage);
-soma_ponteiros += ponteiro;
-ponteiro = snprintf(buff+soma_ponteiros, 50, "\"corrente\" : \"%f\",\n", atual.current);
-soma_ponteiros += ponteiro;
-ponteiro = snprintf(buff+soma_ponteiros, 50, "\"frequencia\" : \"%f\",\n", atual.frequency);
-soma_ponteiros += ponteiro;
-ponteiro = snprintf(buff+soma_ponteiros, 50, "\"pot_at\" : \"%f\",\n", atual.active_power);
-soma_ponteiros += ponteiro;
-ponteiro = snprintf(buff+soma_ponteiros, 50, "\"pot_re\" : \"%f\",\n", atual.reactive_power);
-soma_ponteiros += ponteiro;
-ponteiro = snprintf(buff+soma_ponteiros, 50, "\"pot_ap\" : \"%f\",\n", atual.aparent_power);
-soma_ponteiros += ponteiro;
-ponteiro = snprintf(buff+soma_ponteiros, 50, "\"FP\" : \"%f\"\n", atual.FP);
-soma_ponteiros += ponteiro;
-ponteiro = snprintf(buff+soma_ponteiros, 50, "}");
-strcpy(msg_to_publish, buff);
-}
+void ler_serial(char * received){
+   char message[100];
+   int charsRead = 0;
+   if (Serial.available() > 0) {      // Is the Serial object sending something?
+      charsRead = Serial.readBytesUntil('\n', message, sizeof(message) - 1);   // Yep, so read it...
+      message[charsRead] = '\0';                        // Now make it a C string...
+      strcpy(received, message);
+      Serial.print("Comando recebido: ");
+      Serial.println(received);
+      }
+   }
 
-void publish_message(char* msg_to_publish){   
-    Serial.print("Publishing message: ");
-    Serial.println(msg_to_publish);
-    client.beginPublish(mqtt_topic, String(msg_to_publish).length(), false);
-    //client.beginPublish("home/energymeter", String(msg_to_publish).length(), false);
-    client.print(msg_to_publish);
-    client.endPublish();
-    Serial.println("");
-}
 
 void piscaled(int quantidade, int tempo){
   int i;
@@ -140,18 +113,6 @@ void piscaled(int quantidade, int tempo){
     delay(tempo);
   }
 }
-
-void ler_serial(char * received){
-   char message[100];
-   int charsRead = 0;
-   if (Serial.available() > 0) {      // Is the Serial object sending something?
-      charsRead = Serial.readBytesUntil('\n', message, sizeof(message) - 1);   // Yep, so read it...
-      message[charsRead] = '\0';                        // Now make it a C string...
-      strcpy(received, message);
-      Serial.print("Comando recebido: ");
-      Serial.println(received);
-      }
-   }
 
 void CheckSerial(){
    if (Serial.available()) {
@@ -204,15 +165,20 @@ void setup()
 void loop() {
    if (!digitalRead(SW_DISPLAY) && threadTo(&last_debaunce_time, debaunce_time)) {      
       display_current_view++;       
+//      displayUpdate(&display_current_view);                 // Muda tela do display
+      ADE7753.DisplayBufferCreator(1, atual); //salva dados no buffer "Parameter=value"
+      OLED.ShowCompleteView(display, &atual.display_buffer);  //shows buffer content on display 
    }
 
    if (threadTo(&last_upload_time, time_between_uploads)) {         // Faz upload das informações mais recentes
-      ADE7753.DisplayBufferCreator(1, &atual); //salva dados no buffer "Parameter=value"
-      OLED.ShowCompleteView(atual.display_buffer);  //shows buffer content on display 
       piscaled(2, 50);
+      //  strcpy(atual.id, $id);
       atual.voltage = ADE7753.ReadVRMS();
       atual.timestamp = setClock();
-      createMessage(msg_to_publish, atual);
-      publish_message(msg_to_publish);
+   //  displayUpdate(&display_current_view);
+      Publisher.CreateMessage(atual);
+      Publisher.PublishMessage(client);
    }
+
+//    resetastatus();
 }

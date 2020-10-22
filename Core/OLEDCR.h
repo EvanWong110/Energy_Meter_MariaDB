@@ -11,9 +11,8 @@
     class OLED
     {
         public:
-           // void Init(int SDApin, int SCKpin);
-            void ShowMessage(char* message);
-            void ShowCompleteView(char* data);
+            void ShowMessage(SSD1306Wire display, char* message);
+            void ShowCompleteView(SSD1306Wire display, char* data);
         private:
     };
 
