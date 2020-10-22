@@ -9,41 +9,48 @@
 #define SDApin D1
 #define SCKpin D2
 
-SSD1306Wire OledDisp(0x3c, SDApin, SCKpin);
+SSD1306Wire oledDisp(0x3c, SDApin, SCKpin);
 
 //void OLED::Init(int SDApin, int SCKpin){
+    //SSD1306Wire OledDisp(0x3c, SDApin, SCKpin);
 //}
 
 
 void OLED::ShowMessage(char* message)
 {
-    OledDisp.clear();
-    OledDisp.setColor(WHITE);
-    OledDisp.setTextAlignment(TEXT_ALIGN_CENTER);
-    OledDisp.setFont(ArialMT_Plain_16);
-    OledDisp.drawString((OledDisp.getWidth()/2), (OledDisp.getHeight()/2), message);
-    OledDisp.display();
+    oleddisp.clear();
+    oleddisp.setColor(WHITE);
+    oleddisp.setTextAlignment(TEXT_ALIGN_CENTER);
+    oleddisp.setFont(ArialMT_Plain_16);
+    oleddisp.drawString((oleddisp.getWidth()/2), (oleddisp.getHeight()/2), message);
+    oleddisp.display();
 }
 
 int OLED::ShowCompleteView(char* data)
 {
-    OledDisp.clear();                                                                                
-    OledDisp.setTextAlignment(TEXT_ALIGN_CENTER);                                                    
-    OledDisp.setFont(ArialMT_Plain_16);                                                              
-    OledDisp.drawRect(0, 0, OledDisp.getWidth(), OledDisp.getHeight());               // Retangulo principal borda branca
-    OledDisp.fillRect(0, 0, OledDisp.getWidth(), (OledDisp.getHeight()/2)-8);         // Retangulo interno preenchimento branco
+    oleddisp.clear();                                                                                
+    oleddisp.setTextAlignment(TEXT_ALIGN_CENTER);                                                    
+    oleddisp.setFont(ArialMT_Plain_16);                                                              
+    oleddisp.drawRect(0, 0, oleddisp.getWidth(), oleddisp.getHeight());               // Retangulo principal borda branca
+    oleddisp.fillRect(0, 0, oleddisp.getWidth(), (oleddisp.getHeight()/2)-8);         // Retangulo interno preenchimento branco
 
-    char buff[30];
-    //sprintf(buff, "%s", data);
-    char * pch;
-    pch = strtok (buff, "=");
+    char toptext[30];
+    char bottomtext[30];
+    strcpy(toptext, data);
+    strcpy(bottomtext, data);
+    char* ptr;
+    ptr = strchr(toptext, '=');
+    *ptr = 0;
+    ptr = strchr(bottomtext, '=');
+    bottomtext = ptr;
+    
     Serial.println(pch);
-    OledDisp.setColor(BLACK);                                                       
-    OledDisp.drawString((OledDisp.getWidth()/2),5,pch);   // Imprime o nome do parametro
-    OledDisp.setColor(WHITE);                                                       
-    pch = strtok (NULL, "=");
+    oleddisp.setColor(BLACK);                                                       
+    oleddisp.drawString((oleddisp.getWidth()/2),5,toptext);   // Imprime o nome do parametro
+    oleddisp.setColor(WHITE);                                                       
+  
     Serial.println(pch);
-    OledDisp.drawString((OledDisp.getWidth()/2),(OledDisp.getHeight()/2), pch); // Imprime o valor com a unidade de medida
-    OledDisp.display();
+    oleddisp.drawString((oleddisp.getWidth()/2),(oleddisp.getHeight()/2), bottomtext); // Imprime o valor com a unidade de medida
+    oleddisp.display();
 
 }
