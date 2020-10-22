@@ -30,16 +30,15 @@ const char* wifi_password = "07111993"; // WiFi network password
 char* mqtt_server = "192.168.000.251";  // IP of the MQTT broker
 const char* mqtt_username = "energymeter"; // MQTT username
 const char* mqtt_password = "energymeter"; // MQTT password
+const char* mqtt_topic = "home/energymeter";
 const char* clientID = "client_livingroom"; // MQTT client ID
 const char* ntp_primary = "pool.ntp.org";     // Servidores de fuso horário
 const char* ntp_secondary = "time.nist.gov";
-//const int columns_number=9;
 unsigned long last_upload_time = 0;         // Uso interno nos threads
 unsigned long last_debaunce_time = 0;              
 char msg_to_publish[1000];                 // Armazena a string a ser enviada para o broker
-unsigned long status_register = 0;         // Armazena o valor do registrador de status do ADE
-int display_current_view = 0;              // Armazena a informacao da tela apresentada no display
-
+//unsigned long status_register = 0;         // Armazena o valor do registrador de status do ADE
+//int display_current_view = 0;              // Armazena a informacao da tela apresentada no display
 
 
 //SSD1306Wire display(0x3c, SDA_PIN, SCK_PIN);
@@ -77,72 +76,7 @@ boolean threadTo(unsigned long* last_time, unsigned long default_time) {  //cria
     else 
         return false;  
 }
-/*
-void displayInit(){                 //Inicializa o display
-  display.init();
-  display.flipScreenVertically();
-  display.clear();
-}
 
-void display_msg(String texto){     // Envia mensagens diversas para o display
-  display.clear();
-  display.setColor(WHITE);
-  display.setTextAlignment(TEXT_ALIGN_CENTER);
-  display.setFont(ArialMT_Plain_16);
-  display.drawString((display.getWidth()/2), (display.getHeight()/2), texto);
-  display.display();
-}
-
-void displayUpdate(int * current_view){                                      // Atualiza dados do display  
-  display.clear();                                                                                
-  display.setTextAlignment(TEXT_ALIGN_CENTER);                                                    
-  display.setFont(ArialMT_Plain_16);                                                              
-  display.drawRect(0, 0, display.getWidth(), display.getHeight());               // Retangulo principal borda branca
-  display.fillRect(0, 0, display.getWidth(), (display.getHeight()/2)-8);         // Retangulo interno preenchimento branco
-  char parametro[20], medicao[20];
-  switch(* current_view){
-    case 0:
-        strcpy(parametro, "Tensão");
-        sprintf(medicao, "%.2f V",atual.voltage);
-    break;
-    case 1:
-        strcpy(parametro, "Corrente");
-        sprintf(medicao, "%.2f A",atual.current);
-    break;
-    case 2:
-        strcpy(parametro, "Pot. AT");
-        sprintf(medicao, "%.2f W",atual.active_power);
-    break;
-    case 3:
-        strcpy(parametro, "Pot. RE");
-        sprintf(medicao, "%.2f VAr",atual.reactive_power);
-    break;
-    case 4:
-        strcpy(parametro, "Pot. AP");
-        sprintf(medicao, "%.2f VA",atual.aparent_power);
-    break;
-    case 5:
-        strcpy(parametro, "ID");
-        sprintf(medicao, "%s",atual.id);
-    break;
-    case 6:
-        strcpy(parametro, "FREQ");
-        sprintf(medicao, "%.2f Hz",atual.frequency);    
-    break;
-    case 7:
-        strcpy(parametro, "FP");
-        sprintf(medicao, "%.2f",atual.FP);    
-    break;
-    default:
-    * current_view = 0;
-  }
-  display.setColor(BLACK);                                                       
-  display.drawString((display.getWidth()/2),5,parametro);   // Imprime o nome do parametro
-  display.setColor(WHITE);                                                       
-  display.drawString((display.getWidth()/2),(display.getHeight()/2), medicao); // Imprime o valor com a unidade de medida
-  display.display();
-}
-*/
 long setClock() {        // Set time via NTP, as required for x.509 validation  
   configTime(0 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   Serial.print("Waiting for NTP time sync: ");
@@ -188,24 +122,12 @@ strcpy(msg_to_publish, buff);
 void publish_message(char* msg_to_publish){   
     Serial.print("Publishing message: ");
     Serial.println(msg_to_publish);
-    client.beginPublish("home/energymeter", String(msg_to_publish).length(), false);
+    client.beginPublish(mqtt_topic, String(msg_to_publish).length(), false);
+    //client.beginPublish("home/energymeter", String(msg_to_publish).length(), false);
     client.print(msg_to_publish);
     client.endPublish();
     Serial.println("");
 }
-
-void ler_serial(char * received){
-   char message[100];
-   int charsRead = 0;
-   if (Serial.available() > 0) {      // Is the Serial object sending something?
-      charsRead = Serial.readBytesUntil('\n', message, sizeof(message) - 1);   // Yep, so read it...
-      message[charsRead] = '\0';                        // Now make it a C string...
-      strcpy(received, message);
-      Serial.print("Comando recebido: ");
-      Serial.println(received);
-      }
-   }
-
 
 void piscaled(int quantidade, int tempo){
   int i;
@@ -219,6 +141,17 @@ void piscaled(int quantidade, int tempo){
   }
 }
 
+void ler_serial(char * received){
+   char message[100];
+   int charsRead = 0;
+   if (Serial.available() > 0) {      // Is the Serial object sending something?
+      charsRead = Serial.readBytesUntil('\n', message, sizeof(message) - 1);   // Yep, so read it...
+      message[charsRead] = '\0';                        // Now make it a C string...
+      strcpy(received, message);
+      Serial.print("Comando recebido: ");
+      Serial.println(received);
+      }
+   }
 
 void CheckSerial(){
    if (Serial.available()) {
@@ -271,20 +204,15 @@ void setup()
 void loop() {
    if (!digitalRead(SW_DISPLAY) && threadTo(&last_debaunce_time, debaunce_time)) {      
       display_current_view++;       
-//      displayUpdate(&display_current_view);                 // Muda tela do display
-        }
+   }
 
    if (threadTo(&last_upload_time, time_between_uploads)) {         // Faz upload das informações mais recentes
       ADE7753.DisplayBufferCreator(1, &atual); //salva dados no buffer "Parameter=value"
       OLED.ShowCompleteView(atual.display_buffer);  //shows buffer content on display 
       piscaled(2, 50);
-      //  strcpy(atual.id, $id);
       atual.voltage = ADE7753.ReadVRMS();
       atual.timestamp = setClock();
-   //  displayUpdate(&display_current_view);
       createMessage(msg_to_publish, atual);
       publish_message(msg_to_publish);
    }
-
-//    resetastatus();
 }

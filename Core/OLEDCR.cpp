@@ -11,9 +11,12 @@
 
 SSD1306Wire display(0x3c, SDApin, SCKpin);
 
-//void OLED::Init(int SDApin, int SCKpin){
+void OLED::Init(){
    // SSD1306Wire OledDisp(0x3c, SDApin, SCKpin);
-//}
+   display.init();
+   display.flipScreenVertically();
+   display.clear();
+}
 
 
 void OLED::ShowMessage(char* message)
