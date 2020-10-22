@@ -7,6 +7,8 @@
   #define ADE7753CR_H
 
   #include "Arduino.h"
+  #include "SPI.h"
+  
   //------------------------
   // Lista de registradores 
   //------------------------
@@ -281,7 +283,19 @@
   class ADE7753
   {
     public:
-      //ADE7753();
+      typedef struct {
+        char id[50];
+        char display_buffer[50];
+        unsigned long timestamp;
+        float voltage = 0;
+        float current = 0;
+        float frequency = 0;
+        float active_power = 0;
+        float reactive_power = 0;
+        float aparent_power = 0;
+        float FP = 0;
+      } Measurement;
+
       void Init(int CSpin);
       void Closes();
       void EnableHPF();
@@ -365,19 +379,8 @@
       float ReadVRMS();
       float ReadIRMS();
       float ReadPERIOD(int CLKIN);
+      void DisplayBufferCreator(int view, Measurement data);  
       
-      typedef struct {
-        char * id = "0";
-        unsigned long timestamp;
-        float voltage = 0;
-        float current = 0;
-        float frequency = 0;
-        float active_power = 0;
-        float reactive_power = 0;
-        float aparent_power = 0;
-        float FP = 0;
-      } Measurement;
-
       
     private:
       int _CSpin;

@@ -12,6 +12,7 @@
 #include <time.h>             // Biblioteca com funções relacionadas a fuso horário
 #include <PubSubClient.h>     // Biblioteca para publicacao MQTT na AWS
 #include "ADE7753CR.h"
+#include "OLEDCR.h"
 
 #define SDA_PIN      D1                 // display Pin
 #define SCK_PIN      D2                 // display Pin
@@ -41,8 +42,9 @@ int display_current_view = 0;              // Armazena a informacao da tela apre
 
 
 
-SSD1306Wire display(0x3c, SDA_PIN, SCK_PIN);
+//SSD1306Wire display(0x3c, SDA_PIN, SCK_PIN);
 ADE7753 ADE7753;
+OLED OLED;
 ADE7753::Measurement atual;
 WiFiClient wifiClient;
 PubSubClient client(mqtt_server, 1883, wifiClient); 
@@ -50,7 +52,6 @@ PubSubClient client(mqtt_server, 1883, wifiClient);
 void connect_WIFI(){
   Serial.print("Connecting to ");
   Serial.println(ssid);
-  display_msg("Inicializando...");
   WiFi.begin(ssid, wifi_password);
   while (WiFi.status() != WL_CONNECTED) {
      delay(500);
@@ -76,7 +77,7 @@ boolean threadTo(unsigned long* last_time, unsigned long default_time) {  //cria
     else 
         return false;  
 }
-
+/*
 void displayInit(){                 //Inicializa o display
   display.init();
   display.flipScreenVertically();
@@ -141,7 +142,7 @@ void displayUpdate(int * current_view){                                      // 
   display.drawString((display.getWidth()/2),(display.getHeight()/2), medicao); // Imprime o valor com a unidade de medida
   display.display();
 }
-
+*/
 long setClock() {        // Set time via NTP, as required for x.509 validation  
   configTime(0 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   Serial.print("Waiting for NTP time sync: ");
@@ -257,10 +258,7 @@ void CheckSerial(){
 void setup()
 {
   Serial.begin(9600);            // Inicia comunicação Serial.
-  displayInit();                         // Inicializa displayOLED
-  display.drawString(0, 0, "Inicializando");
-  display.display();
-  delay(1000);
+//  displayInit();                         // Inicializa displayOLED
   connect_WIFI();
   connect_MQTT();
   setClock();                            // atualiza hora do sistema (para a autenticar o certificado e gerar o timestamp)
@@ -273,7 +271,10 @@ void setup()
 void loop() {
    if (!digitalRead(SW_DISPLAY) && threadTo(&last_debaunce_time, debaunce_time)) {      
       display_current_view++;       
-      displayUpdate(&display_current_view);                 // Muda tela do display
+//      displayUpdate(&display_current_view);                 // Muda tela do display
+      ADE7753.DisplayBufferCreator(1, atual); //salva dados no buffer "Parameter=value"
+      char teste[30] = "ola=testando";
+      OLED.ShowCompleteView(teste);  //shows buffer content on display 
    }
 
    if (threadTo(&last_upload_time, time_between_uploads)) {         // Faz upload das informações mais recentes
@@ -281,9 +282,10 @@ void loop() {
       //  strcpy(atual.id, $id);
       atual.voltage = ADE7753.ReadVRMS();
       atual.timestamp = setClock();
-      displayUpdate(&display_current_view);
+   //  displayUpdate(&display_current_view);
       createMessage(msg_to_publish, atual);
       publish_message(msg_to_publish);
    }
+
 //    resetastatus();
 }
