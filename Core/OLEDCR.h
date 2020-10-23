@@ -5,7 +5,7 @@
 */
 #ifndef OLEDCR_h
     #define OLEDCR_h
-
+    #include "Arduino.h"
     #include "SSD1306Wire.h" 
 
     class OLED

@@ -1,6 +1,7 @@
 #ifndef PUBLISHER_H
   #define PUBLISHER_H
   
+  #include "Arduino.h"
   #include "PubSubClient.h"     // Biblioteca para publicacao MQTT na AWS
   #include "ADE7753CR.h"
   
@@ -9,7 +10,7 @@
       public:
           void CreateMessage(ADE7753::Measurement atual);
           void PublishMessage(PubSubClient* pubsubclient);
-  
+
       private:
           char msg_to_publish[1000];
   };

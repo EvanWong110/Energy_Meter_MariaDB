@@ -13,7 +13,6 @@ void OLED::Init(SSD1306Wire display){
    display.clear();
 }
 
-
 void OLED::ShowMessage(SSD1306Wire display, char* message)
 {/*
     oleddisp.clear();

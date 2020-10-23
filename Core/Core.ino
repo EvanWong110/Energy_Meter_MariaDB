@@ -1,4 +1,4 @@
-/* Nome do arquivo: Core.ino
+ /* Nome do arquivo: Core.ino
  * Este é o arquivo main() que possui o setup e o loop principal do programa
  * 
  * Feito por Cristian Fernando Ritter
@@ -6,22 +6,21 @@
  * Todos os direitos reservados
  */
 
-#include <ESP8266WiFi.h>      // Bibliote de suporte a wifi do módulo ESP8266
-#include <time.h>             // Biblioteca com funções relacionadas a fuso horário
+#include <ESP8266WiFi.h>      
+#include <time.h>             
 #include "ADE7753CR.h"
 #include "OLEDCR.h"
-#include "publisher.h"
+#include "PUBLISHERCR.h"
+#include "SERIALCR.h"
 
-#define SDA_PIN      D1                 // display Pin
-#define SCK_PIN      D2                 // display Pin
-#define LEDPIN       D3
-#define SW_DISPLAY   D4              // Chave para mudança de tela
-#define CSPIN        D8                  // SPI Pin
-#define $id "0"
+#define SDA_PIN      D1  // OLED SDA Pin
+#define SCK_PIN      D2  // OLED SCK Pin
+#define LED_EXTERNAL  D3  
+#define SW_DISPLAY   D4  // Display change views
+#define CSPIN        D8  // ADE7753 SPI Enable Pin
 #define time_between_uploads 7000 //ms                        // Tempo entre uploads
 #define debaunce_time 250                                      // Debaunce da chave do display
 #define serial_speed 115200        // Serial port speed
-
 
 const char* ssid = "Home";         // WiFi network name
 const char* wifi_password = "07111993"; // WiFi network password
@@ -35,26 +34,25 @@ unsigned long last_upload_time = 0;         // Uso interno nos threads
 unsigned long last_debaunce_time = 0;              
 
 WiFiClient wifiClient;
-ADE7753 ADE7753;
-OLED OLED;
-ADE7753::Measurement atual;
-SSD1306Wire display(0x3c, SDA_PIN, SCK_PIN);
 PubSubClient client(mqtt_server, 1883, wifiClient); 
+SSD1306Wire display(0x3c, SDA_PIN, SCK_PIN);
+OLED OLED;
+ADE7753 ADE7753;
+ADE7753::Measurement atual;
 Publisher Publisher;
+Serials Serials;
 
-void connect_WIFI(){
+boolean threadTo(unsigned long* last_time, unsigned long default_time)  //cria rotinas que rodam a cada ciclo de tempo especifico
+{ 
+   long now = millis();
+   if (now - *last_time > default_time) {
+      *last_time = now;
+      return true;
+   }  
+   else 
+      return false;  
 }
 
-
-boolean threadTo(unsigned long* last_time, unsigned long default_time) {  //cria rotinas que rodam a cada ciclo de tempo especifico
-    long now = millis();
-    if (now - *last_time > default_time) {
-        *last_time = now;
-        return true;
-    }  
-    else 
-        return false;  
-}
 long setClock() 
 { 
   configTime(0 * 3600, 0, "pool.ntp.org", "time.nist.gov");
@@ -68,86 +66,51 @@ long setClock()
   return now;  
 }
 
-void ler_serial(char * received){
-   char message[100];
-   int charsRead = 0;
-   if (Serial.available() > 0) {      // Is the Serial object sending something?
-      charsRead = Serial.readBytesUntil('\n', message, sizeof(message) - 1);   // Yep, so read it...
-      message[charsRead] = '\0';                        // Now make it a C string...
-      strcpy(received, message);
-      Serial.print("Comando recebido: ");
-      Serial.println(received);
-      }
-   }
 
 
 void piscaled(int quantidade, int tempo){
   int i;
   for (i=0; i<quantidade; i++){
     digitalWrite(LED_BUILTIN, LOW);
-    digitalWrite(LEDPIN, LOW);
+    digitalWrite(LED_EXTERNAL, LOW);
     delay(tempo);
     digitalWrite(LED_BUILTIN, HIGH);
-    digitalWrite(LEDPIN, HIGH);
+    digitalWrite(LED_EXTERNAL, HIGH);
     delay(tempo);
   }
 }
 
-void CheckSerial(){
-   if (Serial.available()) {
-      char received[100] = "";
-      ler_serial(received);
-      Serial.println("SELECIONE UMA OPCAO:");
-      Serial.println("1 - ");
-      Serial.println("2 - ");
-      Serial.println("3 - ");
-      Serial.println("4 - ");
-      Serial.println("5 - "); 
-      while(!Serial.available()){}
-      ler_serial(received);
-      switch ((int) received)
-      {
-      case 1:
-         /* code */
-         break;
-      case 2:
-         /* code */
-         break;
-      case 3:
-         /* code */
-         break;
-      case 4:
-         /* code */
-         break;
-      case 5:
-         /* code */
-         break; 
-      default:
-         break;
-      }
-   }
-}
+
         
 void setup()
 {
-  Serial.begin(9600);            // Inicia comunicação Serial.
+//  Serial.begin(9600);            // Inicia comunicação Serial.
+
   WiFi.begin(ssid, wifi_password);
-//  setClock();                            // atualiza hora do sistema (para a autenticar o certificado e gerar o timestamp)
   pinMode(SW_DISPLAY, INPUT);            
   pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(LEDPIN, OUTPUT);
+  pinMode(LED_EXTERNAL, OUTPUT);
   ADE7753.Init(CSPIN);
 }
 
 void loop() {
     while (WiFi.status() != WL_CONNECTED) {
-        Serial.println("Connecting to Wifi...");
-        delay(500);
+         Serial.print("Connecting to ");
+         Serial.println(ssid);
+         delay(500);
+         if (WiFi.status() == WL_CONNECTED){
+            Serial.print("IP: ");
+            Serial.println(WiFi.localIP());
+         }
     }
-//  Serial.println(WiFi.localIP());
   
     while (!client.connect(clientID, mqtt_username, mqtt_password)) {
         Serial.println("Connecting to MQTT Broker...");
+    }
+
+    if (Serial.available())
+    {
+      Serials.ExecutaComandoSerial();
     }
 
    if (!digitalRead(SW_DISPLAY) && threadTo(&last_debaunce_time, debaunce_time)) {      
