@@ -4,8 +4,7 @@
 #include "Arduino.h"
 #include "ADE7753CR.h"
 
-class Serials 
-{
+class Serials {
     public:
     void ExecutaComandoSerial();
     private:

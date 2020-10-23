@@ -13,8 +13,8 @@ void OLED::Init(SSD1306Wire display){
    display.clear();
 }
 
-void OLED::ShowMessage(SSD1306Wire display, char* message)
-{/*
+void OLED::ShowMessage(SSD1306Wire display, char* message){
+    /*
     oleddisp.clear();
     oleddisp.setColor(WHITE);
     oleddisp.setTextAlignment(TEXT_ALIGN_CENTER);
@@ -23,9 +23,8 @@ void OLED::ShowMessage(SSD1306Wire display, char* message)
     oleddisp.display();*/
 }
 
-void OLED::ShowCompleteView(SSD1306Wire display, char* data)
-{
-   //display.clear();                                                                                
+void OLED::ShowCompleteView(SSD1306Wire display, char* data){
+  //  display.clear();                                                                                
   //  oleddisp.setTextAlignment(TEXT_ALIGN_CENTER);                                                    
   //  oleddisp.setFont(ArialMT_Plain_16);                                                              
   //  oleddisp.drawRect(0, 0, oleddisp.getWidth(), oleddisp.getHeight());               // Retangulo principal borda branca

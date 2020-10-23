@@ -29,10 +29,10 @@ void Publisher::CreateMessage(ADE7753::Measurement data) {
     strcpy(msg_to_publish, buff);
 }
 
-void Publisher::PublishMessage(PubSubClient* pubsubclient){   
+void Publisher::PublishMessage(PubSubClient* pubsubclient, const char* mqtt_topic){   
     Serial.println("Publishing message: ");
     Serial.println(msg_to_publish);
-    pubsubclient->beginPublish("home/energymeter", String(msg_to_publish).length(), false);
+    pubsubclient->beginPublish(mqtt_topic, String(msg_to_publish).length(), false);
     pubsubclient->print(msg_to_publish);
     pubsubclient->endPublish();
     Serial.println("");

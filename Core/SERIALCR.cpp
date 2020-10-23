@@ -13,8 +13,7 @@ void Serials::ReceiveSerial(char* received){
    }
 }
 
-void Serials::ExecutaComandoSerial(){
-   
+void Serials::ExecutaComandoSerial(){  
    if (Serial.available()) {
       char received[100] = "";
       ReceiveSerial(received);

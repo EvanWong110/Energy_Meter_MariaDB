@@ -27,6 +27,7 @@ const char* wifi_password = "07111993"; // WiFi network password
 char* mqtt_server = "192.168.000.251";  // IP of the MQTT broker
 const char* mqtt_username = "energymeter"; // MQTT username
 const char* mqtt_password = "energymeter"; // MQTT password
+const char* mqtt_topic = "home/energymeter";
 const char* clientID = "client_livingroom"; // MQTT client ID
 const char* ntp_primary = "pool.ntp.org";     // Servidores de fuso horário
 const char* ntp_secondary = "time.nist.gov";
@@ -42,9 +43,9 @@ ADE7753::Measurement atual;
 Publisher Publisher;
 Serials Serials;
 
-boolean threadTo(unsigned long* last_time, unsigned long default_time)  //cria rotinas que rodam a cada ciclo de tempo especifico
-{ 
-   long now = millis();
+//cria rotinas que rodam a cada ciclo de tempo especifico 
+boolean threadTo(unsigned long* last_time, unsigned long default_time){ 
+   unsigned long now = millis();
    if (now - *last_time > default_time) {
       *last_time = now;
       return true;
@@ -53,8 +54,7 @@ boolean threadTo(unsigned long* last_time, unsigned long default_time)  //cria r
       return false;  
 }
 
-long setClock() 
-{ 
+unsigned long setClock() { 
   configTime(0 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   Serial.print("Waiting for NTP time sync: ");
   time_t now = time(nullptr);
@@ -65,8 +65,6 @@ long setClock()
   }
   return now;  
 }
-
-
 
 void piscaled(int quantidade, int tempo){
   int i;
@@ -79,13 +77,9 @@ void piscaled(int quantidade, int tempo){
     delay(tempo);
   }
 }
-
-
         
-void setup()
-{
+void setup(){
 //  Serial.begin(9600);            // Inicia comunicação Serial.
-
   WiFi.begin(ssid, wifi_password);
   pinMode(SW_DISPLAY, INPUT);            
   pinMode(LED_BUILTIN, OUTPUT);
@@ -94,6 +88,7 @@ void setup()
 }
 
 void loop() {
+   //WIFI Connecting
     while (WiFi.status() != WL_CONNECTED) {
          Serial.print("Connecting to ");
          Serial.println(ssid);
@@ -103,26 +98,29 @@ void loop() {
             Serial.println(WiFi.localIP());
          }
     }
-  
+   
+    //MQTT Connecting
     while (!client.connect(clientID, mqtt_username, mqtt_password)) {
         Serial.println("Connecting to MQTT Broker...");
     }
 
-    if (Serial.available())
-    {
+    //Serial Received Verify
+    if (Serial.available()){
       Serials.ExecutaComandoSerial();
     }
 
+   //Display View Update
    if (!digitalRead(SW_DISPLAY) && threadTo(&last_debaunce_time, debaunce_time)) {      
-      //ADE7753.DisplayBufferCreator(1, &atual); //salva dados no buffer "Parameter=value"
-      //OLED.ShowCompleteView(display, atual.display_buffer);  //shows buffer content on display 
+      ADE7753.DisplayBufferCreator(1, &atual); //salva dados no buffer "Parameter=value"
+      OLED.ShowCompleteView(display, atual.display_buffer);  //shows buffer content on display 
    }
 
-   if (threadTo(&last_upload_time, time_between_uploads)) {         // Faz upload das informações mais recentes
+   //Payload Upload
+   if (threadTo(&last_upload_time, time_between_uploads)) {         
       piscaled(1, 10);
       atual.voltage = ADE7753.ReadVRMS();
       atual.timestamp = setClock();
       Publisher.CreateMessage(atual);
-      Publisher.PublishMessage(&client);
+      Publisher.PublishMessage(&client, mqtt_topic);
    }
 }
