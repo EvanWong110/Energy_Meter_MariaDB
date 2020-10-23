@@ -345,29 +345,36 @@ float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
     return period;
 }
 
-void ADE7753::DisplayBufferCreator(int view, Measurement* data)  
+void ADE7753::DisplayBufferCreator(Measurement* data, int view)  
 {
-    switch (view)
-    {
-    case 1:
-    Serial.println(data->voltage);
-        sprintf(data->display_buffer, "Voltage=%f", data->voltage);
-        break;
-    case 2:
-        sprintf(data->display_buffer, "Current=%f", data->current);
-        break;
-    case 3:
-        sprintf(data->display_buffer, "FP=%f", data->FP);
-        break;
-    case 4:
-        sprintf(data->display_buffer, "Frequency=%f", data->frequency);
-        break;
-    case 5:
-        sprintf(data->display_buffer, "Apparent Potency=%f", data->aparent_power);
-        break;
-    default:
-        break;
+    switch (view){
+      case 1:
+          sprintf(data->display_buffer, "Voltage=%f", data->voltage);
+          display_position++;
+          break;
+      case 2:
+          sprintf(data->display_buffer, "Current=%f", data->current);
+          display_position++;
+          break;
+      case 3:
+          sprintf(data->display_buffer, "FP=%f", data->FP);
+          display_position++;
+          break;
+      case 4:
+          sprintf(data->display_buffer, "Frequency=%f", data->frequency);
+          display_position++;
+          break;
+      case 5:
+          sprintf(data->display_buffer, "Apparent Potency=%f", data->aparent_power);
+          display_position = 1;
+          break;
+      default:
+          break;
     }
+}
+
+int ADE7753::GetDisplayPosition(){
+    return display_position;
 }
 
 //------------------  

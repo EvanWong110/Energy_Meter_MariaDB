@@ -379,8 +379,8 @@
       float ReadVRMS();
       float ReadIRMS();
       float ReadPERIOD(int CLKIN);
-      void DisplayBufferCreator(int view, Measurement* data);  
-      
+      void DisplayBufferCreator(Measurement* data, int view = 1);
+      int GetDisplayPosition();
       
     private:
       int _CSpin;
@@ -394,6 +394,6 @@
       void Write8(char reg, unsigned long value);
       void Write16(char reg, unsigned long value);
       int WaitZeroCross();
-      
+      int display_position = 1;
   };
 #endif

@@ -15,7 +15,7 @@
 
 #define SDA_PIN      D1  // OLED SDA Pin
 #define SCK_PIN      D2  // OLED SCK Pin
-#define LED_EXTERNAL  D3  
+#define LED_EXTERNAL D3  
 #define SW_DISPLAY   D4  // Display change views
 #define CSPIN        D8  // ADE7753 SPI Enable Pin
 #define time_between_uploads 7000 //ms                        // Tempo entre uploads
@@ -79,12 +79,13 @@ void piscaled(int quantidade, int tempo){
 }
         
 void setup(){
-//  Serial.begin(9600);            // Inicia comunicação Serial.
+  Serial.begin(9600);            // Inicia comunicação Serial.
   WiFi.begin(ssid, wifi_password);
   pinMode(SW_DISPLAY, INPUT);            
   pinMode(LED_BUILTIN, OUTPUT);
   pinMode(LED_EXTERNAL, OUTPUT);
   ADE7753.Init(CSPIN);
+  OLED.Init(&display);
 }
 
 void loop() {
@@ -110,9 +111,9 @@ void loop() {
     }
 
    //Display View Update
-   if (!digitalRead(SW_DISPLAY) && threadTo(&last_debaunce_time, debaunce_time)) {      
-      ADE7753.DisplayBufferCreator(1, &atual); //salva dados no buffer "Parameter=value"
-      OLED.ShowCompleteView(display, atual.display_buffer);  //shows buffer content on display 
+   if (digitalRead(!SW_DISPLAY) && threadTo(&last_debaunce_time, debaunce_time)) {      
+      ADE7753.DisplayBufferCreator(&atual, ADE7753.GetDisplayPosition()); //salva dados no buffer "Parameter=value"
+      OLED.ShowCompleteView(&display, atual.display_buffer);  //shows buffer content on display 
    }
 
    //Payload Upload
