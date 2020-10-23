@@ -28,6 +28,8 @@ char* mqtt_server = "192.168.000.251";  // IP of the MQTT broker
 const char* mqtt_username = "energymeter"; // MQTT username
 const char* mqtt_password = "energymeter"; // MQTT password
 const char* mqtt_topic = "home/energymeter";
+const char* dev_id = "0";
+const char* dev_abstract = "Cristian's Bedroom";
 const char* clientID = "client_livingroom"; // MQTT client ID
 const char* ntp_primary = "pool.ntp.org";     // Servidores de fuso horário
 const char* ntp_secondary = "time.nist.gov";
@@ -56,13 +58,14 @@ boolean threadTo(unsigned long* last_time, unsigned long default_time){
 
 unsigned long setClock() { 
   configTime(0 * 3600, 0, "pool.ntp.org", "time.nist.gov");
-  Serial.print("Waiting for NTP time sync: ");
+  Serial.print("Getting NTP time sync... ");
   time_t now = time(nullptr);
   while (now < 8 * 3600 * 2) {
       delay(500);
       Serial.print(".");
       now = time(nullptr);
   }
+  Serial.println(" OK");
   return now;  
 }
 
@@ -92,8 +95,9 @@ void loop() {
    //WIFI Connecting
     while (WiFi.status() != WL_CONNECTED) {
          Serial.print("Connecting to ");
-         Serial.println(ssid);
-         delay(500);
+         Serial.print(ssid);
+         Serial.println("...");
+         delay(1000);
          if (WiFi.status() == WL_CONNECTED){
             Serial.print("IP: ");
             Serial.println(WiFi.localIP());
@@ -107,7 +111,7 @@ void loop() {
 
     //Serial Received Verify
     if (Serial.available()){
-      Serials.ExecutaComandoSerial();
+      Serials.ExecutaComandoSerial(&ADE7753);
     }
 
    //Display View Update
@@ -120,6 +124,9 @@ void loop() {
    if (threadTo(&last_upload_time, time_between_uploads)) {         
       piscaled(1, 10);
       atual.voltage = ADE7753.ReadVRMS();
+      atual.current = ADE7753.ReadIRMS();
+      strcpy(atual.dev_id, dev_id);
+      strcpy(atual.dev_abstract, dev_abstract);
       atual.timestamp = setClock();
       Publisher.CreateMessage(atual);
       Publisher.PublishMessage(&client, mqtt_topic);

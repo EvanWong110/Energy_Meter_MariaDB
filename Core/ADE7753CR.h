@@ -284,9 +284,9 @@
   {
     public:
       typedef struct {
-        char id[50] = "0";
+        char dev_id[50] = "0";
+        char dev_abstract[200] = "device descriptor";
         char display_buffer[50];
-        unsigned long timestamp;
         float voltage = 0;
         float current = 0;
         float frequency = 0;
@@ -294,6 +294,7 @@
         float reactive_power = 0;
         float aparent_power = 0;
         float FP = 0;
+        unsigned long timestamp = 0;
       } Measurement;
 
       void Init(int CSpin);
@@ -375,7 +376,10 @@
       bool CheckZeroCrossingTimeout();
       bool CheckPowerChangeToPos();
       bool CheckPowerChangeToNeg();
-      char ResetaStatusReg();
+      
+      long int ReadModeReg();
+      long int ReadStatusReg();
+      long int ResetaStatusReg();
       float ReadVRMS();
       float ReadIRMS();
       float ReadPERIOD(int CLKIN);

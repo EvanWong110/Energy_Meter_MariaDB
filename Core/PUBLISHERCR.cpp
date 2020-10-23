@@ -7,7 +7,9 @@ void Publisher::CreateMessage(ADE7753::Measurement data) {
     int soma_ponteiros = 0;
     ponteiro = snprintf(buff, 50, "{\n");
     soma_ponteiros += ponteiro;
-    ponteiro = snprintf(buff+soma_ponteiros, 50, "\"id\" : \"%s\",\n", data.id);
+    ponteiro = snprintf(buff+soma_ponteiros, 50, "\"id\" : \"%s\",\n", data.dev_id);
+    soma_ponteiros += ponteiro;
+    ponteiro = snprintf(buff+soma_ponteiros, 50, "\"abstract\" : \"%s\",\n", data.dev_abstract);
     soma_ponteiros += ponteiro;
     ponteiro = snprintf(buff+soma_ponteiros, 50, "\"timestamp\" : \"%d\",\n", data.timestamp);
     soma_ponteiros += ponteiro;

@@ -6,7 +6,7 @@
 
 class Serials {
     public:
-    void ExecutaComandoSerial();
+    void ExecutaComandoSerial(ADE7753* ADE7753);
     private:
     void ReceiveSerial(char* received);
     

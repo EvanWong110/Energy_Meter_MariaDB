@@ -13,6 +13,7 @@ void ADE7753::Init(int CSpin)
     pinMode(_CSpin, OUTPUT);
     SPI.begin();
     SPI.beginTransaction (SPISettings (4000000, MSBFIRST, SPI_MODE1));
+    SoftReset();
 }
 
 void ADE7753::Closes()
@@ -78,18 +79,26 @@ void ADE7753::DisableAcummulationMode(){
 
 void ADE7753::DisableCH1(){  
     SetBits(MODE, DISCH1);
+    Serial.println("CH1 AD Disabled");
+    Serial.println(ReadModeReg(),BIN);
 }
 
 void ADE7753::DisableCH2(){
     SetBits(MODE, DISCH2);
+    Serial.println("CH2 AD Disabled");
+    Serial.println(ReadModeReg(),BIN);
 }
 
 void ADE7753::EnableCH1(){
     UnsetBits(MODE, DISCH1);
+    Serial.println("CH1 AD Enabled");
+    Serial.println(ReadModeReg(),BIN);
 }
 
 void ADE7753::EnableCH2(){
     UnsetBits(MODE, DISCH2);
+    Serial.println("CH2 AD Enabled");
+    Serial.println(ReadModeReg(),BIN);
 }
 
 void ADE7753::DisableSwap(){
@@ -312,7 +321,15 @@ bool ADE7753::CheckPowerChangeToNeg(){
     return(Read16(STATUS) & PNEG);
 }
 
-char ADE7753::ResetaStatusReg(){
+long int ADE7753::ReadModeReg(){
+    return Read16(MODE);  
+}
+
+long int ADE7753::ReadStatusReg(){
+    return Read16(STATUS);  
+}
+
+long int ADE7753::ResetaStatusReg(){
     return Read16(RSTSTATUS);
 }
 
@@ -321,19 +338,22 @@ float ADE7753::ReadVRMS(){  //returns a % of full range [0.5Vin]
     float percent;
     WaitZeroCross();
     reg_value = Read24(VRMS);
-    Serial.println("VRMS BIN Value: ");
+    Serial.print("VRMS BIN Value: ");
     Serial.println(reg_value,BIN);
     percent = (reg_value/1561400.00000)*100;
     Serial.println(percent);
     return percent;
 }
   
-float ADE7753::ReadIRMS(){
+float ADE7753::ReadIRMS(){ //returns a % of full range [0.5Vin]
     unsigned long reg_value;
     float percent;
     WaitZeroCross();
     reg_value = Read24(IRMS);
-    percent = (reg_value /1868467)*100;   //returns a % of full range [0.5Vin]
+    Serial.print("IRMS BIN Value: ");
+    Serial.println(reg_value,BIN);
+    percent = (reg_value /1868467.00000)*100;   
+    Serial.println(percent);
     return percent;
 }
 
@@ -396,7 +416,7 @@ void ADE7753::SetBits(char reg, unsigned long value){
 }
 
 void ADE7753::UnsetBits(char reg, unsigned long value){
-    Write16(reg, Read16(reg) & value);
+    Write16(reg, Read16(reg) & ~value);
 }
 
 unsigned long ADE7753::Read8(char reg){
