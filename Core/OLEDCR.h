@@ -11,6 +11,7 @@
     class OLED
     {
         public:
+            void Init(SSD1306Wire display);
             void ShowMessage(SSD1306Wire display, char* message);
             void ShowCompleteView(SSD1306Wire display, char* data);
         private:

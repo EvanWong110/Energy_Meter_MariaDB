@@ -7,14 +7,14 @@
 #include "OLEDCR.h"
 
 
-void OLED::Init(){
+void OLED::Init(SSD1306Wire display){
    display.init();
    display.flipScreenVertically();
    display.clear();
 }
 
 
-void OLED::ShowMessage(char* message)
+void OLED::ShowMessage(SSD1306Wire display, char* message)
 {/*
     oleddisp.clear();
     oleddisp.setColor(WHITE);
@@ -24,7 +24,7 @@ void OLED::ShowMessage(char* message)
     oleddisp.display();*/
 }
 
-void OLED::ShowCompleteView(char* data)
+void OLED::ShowCompleteView(SSD1306Wire display, char* data)
 {
    //display.clear();                                                                                
   //  oleddisp.setTextAlignment(TEXT_ALIGN_CENTER);                                                    

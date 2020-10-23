@@ -321,10 +321,10 @@ float ADE7753::ReadVRMS(){  //returns a % of full range [0.5Vin]
     float percent;
     WaitZeroCross();
     reg_value = Read24(VRMS);
-    Serial.print("VRMS BIN Value: ");
+    Serial.println("VRMS BIN Value: ");
     Serial.println(reg_value,BIN);
     percent = (reg_value/1561400.00000)*100;
-    Serial.print(percent);
+    Serial.println(percent);
     return percent;
 }
   

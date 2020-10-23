@@ -284,7 +284,7 @@
   {
     public:
       typedef struct {
-        char id[50];
+        char id[50] = "0";
         char display_buffer[50];
         unsigned long timestamp;
         float voltage = 0;
