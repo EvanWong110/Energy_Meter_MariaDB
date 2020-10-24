@@ -13,11 +13,11 @@
 #include "PUBLISHERCR.h"
 #include "SERIALCR.h"
 
-#define SDA_PIN      D1  // OLED SDA Pin
-#define SCK_PIN      D2  // OLED SCK Pin
+#define SDA_PIN D1  // OLED SDA Pin
+#define SCK_PIN D2  // OLED SCK Pin
 #define LED_EXTERNAL D3  
-#define SW_DISPLAY   D4  // Display change views
-#define CSPIN        D8  // ADE7753 SPI Enable Pin
+#define SW_PIN D4  // Display change views
+#define CSPIN D8  // ADE7753 SPI Enable Pin
 #define time_between_uploads 7000 //ms                        // Tempo entre uploads
 #define debaunce_time 250                                      // Debaunce da chave do display
 #define serial_speed 115200        // Serial port speed
@@ -35,6 +35,7 @@ const char* ntp_primary = "pool.ntp.org";     // Servidores de fuso horário
 const char* ntp_secondary = "time.nist.gov";
 unsigned long last_upload_time = 0;         // Uso interno nos threads
 unsigned long last_debaunce_time = 0;              
+boolean offline_mode = false;
 
 WiFiClient wifiClient;
 PubSubClient client(mqtt_server, 1883, wifiClient); 
@@ -72,10 +73,8 @@ unsigned long setClock() {
 void piscaled(int quantidade, int tempo){
   int i;
   for (i=0; i<quantidade; i++){
-    digitalWrite(LED_BUILTIN, LOW);
     digitalWrite(LED_EXTERNAL, LOW);
     delay(tempo);
-    digitalWrite(LED_BUILTIN, HIGH);
     digitalWrite(LED_EXTERNAL, HIGH);
     delay(tempo);
   }
@@ -84,16 +83,20 @@ void piscaled(int quantidade, int tempo){
 void setup(){
   Serial.begin(9600);            // Inicia comunicação Serial.
   WiFi.begin(ssid, wifi_password);
-  pinMode(SW_DISPLAY, INPUT);            
-  pinMode(LED_BUILTIN, OUTPUT);
+  pinMode(SW_PIN, INPUT);            
   pinMode(LED_EXTERNAL, OUTPUT);
   ADE7753.Init(CSPIN);
   OLED.Init(&display);
+  delay(2000);
+  if (digitalRead(SW_PIN) == LOW){
+    offline_mode = true;  //allows offline tests
+    Serial.println(digitalRead(SW_PIN));
+  }
 }
 
 void loop() {
-   //WIFI Connecting
     while (WiFi.status() != WL_CONNECTED) {
+         if (offline_mode) break;
          Serial.print("Connecting to ");
          Serial.print(ssid);
          Serial.println("...");
@@ -106,6 +109,7 @@ void loop() {
    
     //MQTT Connecting
     while (!client.connect(clientID, mqtt_username, mqtt_password)) {
+        if (offline_mode) break;
         Serial.println("Connecting to MQTT Broker...");
     }
 
@@ -115,20 +119,24 @@ void loop() {
     }
 
    //Display View Update
-   if (digitalRead(!SW_DISPLAY) && threadTo(&last_debaunce_time, debaunce_time)) {      
+   if (!digitalRead(SW_PIN) && threadTo(&last_debaunce_time, debaunce_time)) {      
       ADE7753.DisplayBufferCreator(&atual, ADE7753.GetDisplayPosition()); //salva dados no buffer "Parameter=value"
       OLED.ShowCompleteView(&display, atual.display_buffer);  //shows buffer content on display 
    }
 
    //Payload Upload
    if (threadTo(&last_upload_time, time_between_uploads)) {         
-      piscaled(1, 10);
+      piscaled(1, 100);
       atual.voltage = ADE7753.ReadVRMS();
       atual.current = ADE7753.ReadIRMS();
       strcpy(atual.dev_id, dev_id);
       strcpy(atual.dev_abstract, dev_abstract);
-      atual.timestamp = setClock();
+      if (!offline_mode){
+          atual.timestamp = setClock();
+      }
       Publisher.CreateMessage(atual);
-      Publisher.PublishMessage(&client, mqtt_topic);
+      if (!offline_mode){
+            Publisher.PublishMessage(&client, mqtt_topic);
+      }
    }
 }

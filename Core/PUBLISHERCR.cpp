@@ -29,13 +29,13 @@ void Publisher::CreateMessage(ADE7753::Measurement data) {
     soma_ponteiros += ponteiro;
     ponteiro = snprintf(buff+soma_ponteiros, 50, "}");
     strcpy(msg_to_publish, buff);
+    Serial.println(msg_to_publish);
 }
 
 void Publisher::PublishMessage(PubSubClient* pubsubclient, const char* mqtt_topic){   
-    Serial.println("Publishing message: ");
-    Serial.println(msg_to_publish);
+    Serial.print("Publishing message...");
     pubsubclient->beginPublish(mqtt_topic, String(msg_to_publish).length(), false);
     pubsubclient->print(msg_to_publish);
     pubsubclient->endPublish();
-    Serial.println("");
+    Serial.println(" OK.");
 }
