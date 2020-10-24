@@ -69,11 +69,11 @@ void ADE7753::SoftReset(){
     delayMicroseconds(18);
 }
 
-void ADE7753::EnableAcummulationMode(){
+void ADE7753::EnableAccumulationMode(){
     SetBits(MODE, CYCMODE); 
 }
 
-void ADE7753::DisableAcummulationMode(){
+void ADE7753::DisableAccumulationMode(){
     UnsetBits(MODE, CYCMODE); 
 }
 
@@ -169,11 +169,11 @@ void ADE7753::DisableIRQSAG(){
     UnsetBits(IRQEN, SAG);
 }
 
-void ADE7753::EnableIRQCycleEnergyAcumulationEnd(){
+void ADE7753::EnableIRQCycleEnergyAccumulationEnd(){
     SetBits(IRQEN, CYCEND);   
 }
 
-void ADE7753::DisableIRQCycleEnergyAcumulationEnd(){
+void ADE7753::DisableIRQCycleEnergyAccumulationEnd(){
     UnsetBits(IRQEN, CYCEND);   
 }
 
@@ -266,59 +266,59 @@ void ADE7753::DisablesIRQPowerChangeToNeg(){
 }
 
 bool ADE7753::CheckActiveEnergyHalfFull(){
-    return(Read16(STATUS) & AEHF);
+    return(Read16(RSTSTATUS) & AEHF);
 }
 
 bool ADE7753::CheckSAG(){
-    return(Read16(STATUS) & SAG);
+    return(Read16(RSTSTATUS) & SAG);
 }
 
-bool ADE7753::CheckCycleEnergyAcumulationEnd(){
-    return(Read16(STATUS) & CYCEND);
+bool ADE7753::CheckCycleEnergyAccumulationEnd(){
+    return(Read16(RSTSTATUS) & CYCEND);
 }
 
 bool ADE7753::CheckNewWaveformData(){
-    return(Read16(STATUS) & WSMP);
+    return(Read16(RSTSTATUS) & WSMP);
 }
 
 bool ADE7753::CheckZeroCrossing(){
-    return(Read16(STATUS) & ZX);
+    return(Read16(RSTSTATUS) & ZX);
 }
 
 bool ADE7753::CheckTemperatureResults(){
-    return(Read16(STATUS) & TEMP);
+    return(Read16(RSTSTATUS) & TEMP);
 }
 
 bool ADE7753::CheckActiveEnergyOverflow(){
-    return(Read16(STATUS) & AEOF);
+    return(Read16(RSTSTATUS) & AEOF);
 }
 
 bool ADE7753::CheckCH2VlvlPeek(){
-    return(Read16(STATUS) & PKV);
+    return(Read16(RSTSTATUS) & PKV);
 }
 
 bool ADE7753::CheckCH1IlvlPeek(){
-    return(Read16(STATUS) & PKI);
+    return(Read16(RSTSTATUS) & PKI);
 }
 
 bool ADE7753::CheckAparentEnergyHalfFull(){
-    return(Read16(STATUS) & VAEHF);
+    return(Read16(RSTSTATUS) & VAEHF);
 }
 
 bool ADE7753::CheckAparentEnergyOverflow(){
-    return(Read16(STATUS) & VAEOF);
+    return(Read16(RSTSTATUS) & VAEOF);
 }
 
 bool ADE7753::CheckZeroCrossingTimeout(){
-    return(Read16(STATUS) & ZXTO);
+    return(Read16(RSTSTATUS) & ZXTO);
 }
 
 bool ADE7753::CheckPowerChangeToPos(){
-    return(Read16(STATUS) & PPOS);
+    return(Read16(RSTSTATUS) & PPOS);
 }
 
 bool ADE7753::CheckPowerChangeToNeg(){
-    return(Read16(STATUS) & PNEG);
+    return(Read16(RSTSTATUS) & PNEG);
 }
 
 long int ADE7753::ReadModeReg(){
@@ -326,23 +326,36 @@ long int ADE7753::ReadModeReg(){
 }
 
 long int ADE7753::ReadStatusReg(){
-    return Read16(STATUS);  
+    return Read16(RSTSTATUS);  
 }
 
 long int ADE7753::ResetaStatusReg(){
     return Read16(RSTSTATUS);
 }
 
-float ADE7753::ReadVRMS(){  //returns a % of full range [0.5Vin]
-    unsigned long reg_value;
-    float percent;
+long int ADE7753::SetVRMSOS(long int value){
+    Write16(VRMSOS, value);
+    return Read16(VRMSOS);        
+}
+
+long int ADE7753::SetLINECYC(long int value){
+    Write16(LINECYC, value);
+    return Read16(LINECYC);
+}
+
+float ADE7753::ReadVRMS(){  //returns a Vin
+    unsigned long media = 0;
+    float value;
+    for (int i=0; i<60; i++)
+    {
     WaitZeroCross();
-    reg_value = Read24(VRMS);
-    Serial.print("VRMS BIN Value: ");
-    Serial.println(reg_value,BIN);
-    percent = (reg_value/1561400.00000)*100;
-    Serial.println(percent);
-    return percent;
+    media += Read24(VRMS);  
+    }
+    media /= 60; 
+    value = (media/1561400.000000*0.5);
+    value -=0.015222; //offset when CH2 disabled
+    value *= 0.74985;
+    return value;
 }
   
 float ADE7753::ReadIRMS(){ //returns a % of full range [0.5Vin]
@@ -350,10 +363,7 @@ float ADE7753::ReadIRMS(){ //returns a % of full range [0.5Vin]
     float percent;
     WaitZeroCross();
     reg_value = Read24(IRMS);
-    Serial.print("IRMS BIN Value: ");
-    Serial.println(reg_value,BIN);
     percent = (reg_value /1868467.00000)*100;   
-    Serial.println(percent);
     return percent;
 }
 
@@ -361,32 +371,50 @@ float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
     unsigned long reg_value;
     float period;
     reg_value = Read16(PERIOD);
-    period = (8*reg_value)/CLKIN;
+    period = (8.0000000*reg_value)/CLKIN;
     return period;
 }
 
-void ADE7753::DisplayBufferCreator(Measurement* data, int view)  
+float ADE7753::ReadActiveEnergy(){ //return active energy in Watt-Hour still needs calibration to work
+    unsigned long value;
+    EnableAccumulationMode();
+    SetLINECYC(60);
+    CheckCycleEnergyAccumulationEnd();
+    value = Read24(LAENERGY);
+    return value;
+}
+
+      
+void ADE7753::DisplayBufferUpdate(Measurement* data, int view, boolean next)  
 {
     switch (view){
       case 1:
-          sprintf(data->display_buffer, "Voltage=%f", data->voltage);
-          display_position++;
+          sprintf(data->display_buffer, "Voltage=%.1f", data->voltage);
+          display_position+=next;
           break;
       case 2:
-          sprintf(data->display_buffer, "Current=%f", data->current);
-          display_position++;
+          sprintf(data->display_buffer, "Current=%.2f", data->current);
+          display_position+=next;
           break;
       case 3:
-          sprintf(data->display_buffer, "FP=%f", data->FP);
-          display_position++;
+          sprintf(data->display_buffer, "FP=%.2f", data->FP);
+          display_position+=next;
           break;
       case 4:
-          sprintf(data->display_buffer, "Frequency=%f", data->frequency);
-          display_position++;
+          sprintf(data->display_buffer, "Frequency=%.2f", data->frequency);
+          display_position+=next;
           break;
       case 5:
-          sprintf(data->display_buffer, "Apparent Potency=%f", data->aparent_power);
-          display_position = 1;
+          sprintf(data->display_buffer, "Apparent Potency=%.0f", data->aparent_power);
+          display_position+=next;
+          break;
+      case 6:
+          sprintf(data->display_buffer, "Active Potency=%.0f", data->active_power);
+          display_position+=next;
+          break;
+      case 7:
+          sprintf(data->display_buffer, "Reactive Potency=%.0f", data->reactive_power);
+          if (next) display_position = 1;
           break;
       default:
           break;
@@ -478,13 +506,27 @@ void ADE7753::Write16(char reg, unsigned long value){
     Disable();
 }
 
+unsigned long ADE7753::ValorMedio(int qtde_amostras, unsigned long (*function)(char), char reg ){
+  unsigned long media = 0;
+  for (int x=0; x<qtde_amostras; x++)
+    {
+      WaitZeroCross();
+      media = media + (*function)(reg);
+    }  
+    media = media / qtde_amostras;
+    return media;
+}
+
 int ADE7753::WaitZeroCross(){  //returns 0 when ZeroCross
-    unsigned long value = 1;
+    unsigned long value = 0;
     unsigned long conta_millis = millis();
-    while (!value) {
-        if (millis() > conta_millis+100) 
-            break; 
-        value = (0b10000 & Read16(STATUS));    
+    ResetaStatusReg();
+    while (!CheckZeroCrossing()) {
+        if (millis() > (conta_millis+1000)){
+            Serial.println("ZX ERROR");
+            value = 1;
+            break;
+        }    
     }
     return value;
 }

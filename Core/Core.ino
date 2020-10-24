@@ -34,7 +34,6 @@ const char* clientID = "client_livingroom"; // MQTT client ID
 const char* ntp_primary = "pool.ntp.org";     // Servidores de fuso horário
 const char* ntp_secondary = "time.nist.gov";
 unsigned long last_upload_time = 0;         // Uso interno nos threads
-unsigned long last_debaunce_time = 0;              
 boolean offline_mode = false;
 
 WiFiClient wifiClient;
@@ -87,7 +86,9 @@ void setup(){
   pinMode(LED_EXTERNAL, OUTPUT);
   ADE7753.Init(CSPIN);
   OLED.Init(&display);
+  OLED.ShowMessage(&display, "OFFLINE?");
   delay(2000);
+  OLED.ShowMessage(&display, "");
   if (digitalRead(SW_PIN) == LOW){
     offline_mode = true;  //allows offline tests
     Serial.println(digitalRead(SW_PIN));
@@ -118,19 +119,18 @@ void loop() {
       Serials.ExecutaComandoSerial(&ADE7753);
     }
 
-   //Display View Update
-   if (!digitalRead(SW_PIN) && threadTo(&last_debaunce_time, debaunce_time)) {      
-      ADE7753.DisplayBufferCreator(&atual, ADE7753.GetDisplayPosition()); //salva dados no buffer "Parameter=value"
+      strcpy(atual.dev_id, dev_id);
+      strcpy(atual.dev_abstract, dev_abstract);
+      atual.voltage = ADE7753.ReadVRMS()*598.5;  //fator reducao do trafo + divisores de tensao
+      atual.current = ADE7753.ReadIRMS();
+      atual.frequency = 1/(ADE7753.ReadPERIOD(3579545));
+
+      ADE7753.DisplayBufferUpdate(&atual, ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
       OLED.ShowCompleteView(&display, atual.display_buffer);  //shows buffer content on display 
-   }
 
    //Payload Upload
    if (threadTo(&last_upload_time, time_between_uploads)) {         
       piscaled(1, 100);
-      atual.voltage = ADE7753.ReadVRMS();
-      atual.current = ADE7753.ReadIRMS();
-      strcpy(atual.dev_id, dev_id);
-      strcpy(atual.dev_abstract, dev_abstract);
       if (!offline_mode){
           atual.timestamp = setClock();
       }

@@ -311,8 +311,8 @@
       void EnableADConverters();
       void StartTemperatureMeasurement();
       void SoftReset();
-      void EnableAcummulationMode();
-      void DisableAcummulationMode();
+      void EnableAccumulationMode();
+      void DisableAccumulationMode();
       void DisableCH1(); //Puts inputs internally in short
       void DisableCH2();
       void EnableCH1();
@@ -338,8 +338,8 @@
       void DisableIRQActiveEnergyHalfFull();
       void EnableIRQSAG();
       void DisableIRQSAG();
-      void EnableIRQCycleEnergyAcumulationEnd();
-      void DisableIRQCycleEnergyAcumulationEnd();
+      void EnableIRQCycleEnergyAccumulationEnd();
+      void DisableIRQCycleEnergyAccumulationEnd();
       void EnableIRQNewWaveformData();
       void DisableIRQNewWaveformData();
       void EnableIRQZeroCrossing();
@@ -364,9 +364,9 @@
       void DisablesIRQPowerChangeToNeg();
       bool CheckActiveEnergyHalfFull();
       bool CheckSAG();
-      bool CheckCycleEnergyAcumulationEnd();
+      bool CheckCycleEnergyAccumulationEnd();
       bool CheckNewWaveformData();
-      bool CheckZeroCrossing();
+      bool CheckZeroCrossing();  //returns 
       bool CheckTemperatureResults();
       bool CheckActiveEnergyOverflow();
       bool CheckCH2VlvlPeek();
@@ -377,13 +377,19 @@
       bool CheckPowerChangeToPos();
       bool CheckPowerChangeToNeg();
       
+      
       long int ReadModeReg();
       long int ReadStatusReg();
       long int ResetaStatusReg();
+
+      long int SetVRMSOS(long int value);
+      long int SetLINECYC(long int value);
+      
       float ReadVRMS();
       float ReadIRMS();
       float ReadPERIOD(int CLKIN);
-      void DisplayBufferCreator(Measurement* data, int view = 1);
+      float ReadActiveEnergy();
+      void DisplayBufferUpdate(Measurement* data, int view = 1, boolean next = 0);
       int GetDisplayPosition();
       
     private:
@@ -397,6 +403,7 @@
       unsigned long Read24(char reg);
       void Write8(char reg, unsigned long value);
       void Write16(char reg, unsigned long value);
+      unsigned long ValorMedio(int qtde_amostras, unsigned long (*function)(char), char reg );
       int WaitZeroCross();
       int display_position = 1;
   };

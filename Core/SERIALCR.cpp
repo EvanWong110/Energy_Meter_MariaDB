@@ -3,6 +3,7 @@
 void Serials::ReceiveSerial(char* received){
    char message[100];
    int charsRead = 0;
+   while(!Serial.available()){}
    if (Serial.available() > 0) 
    {  // Is the Serial object sending something?
       charsRead = Serial.readBytesUntil('\n', message, sizeof(message) - 1);   // Yep, so read it...
@@ -22,8 +23,7 @@ void Serials::ExecutaComandoSerial(ADE7753* ADE7753){
       Serial.println("2 - Enable CH1");
       Serial.println("3 - Disable CH2");
       Serial.println("4 - Enable CH2");
-      Serial.println("5 - "); 
-      while(!Serial.available()){}
+      Serial.println("5 - Set VRMSOS"); 
       ReceiveSerial(received);
       int option = atoi(received);
       switch (option){
@@ -48,6 +48,9 @@ void Serials::ExecutaComandoSerial(ADE7753* ADE7753){
              ADE7753->EnableCH2();
             break;
           case 5:
+             Serial.println("Value input: ");
+             ReceiveSerial(received);           
+             Serial.println(ADE7753->SetVRMSOS(atoi(received)));
              /* code */
              break; 
       }
