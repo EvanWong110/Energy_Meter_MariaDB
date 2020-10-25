@@ -60,12 +60,6 @@ unsigned long setClock() {
   configTime(0 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   Serial.print("Getting NTP time sync... ");
   time_t now = time(nullptr);
-  while (now < 8 * 3600 * 2) {
-      delay(500);
-      Serial.print(".");
-      now = time(nullptr);
-  }
-  Serial.println(" OK");
   return now;  
 }
 
@@ -86,34 +80,21 @@ void setup(){
   pinMode(LED_EXTERNAL, OUTPUT);
   ADE7753.Init(CSPIN);
   OLED.Init(&display);
-  OLED.ShowMessage(&display, "OFFLINE?");
-  delay(2000);
-  OLED.ShowMessage(&display, "");
-  if (digitalRead(SW_PIN) == LOW){
-    offline_mode = true;  //allows offline tests
-    Serial.println(digitalRead(SW_PIN));
-  }
 }
 
 void loop() {
-    while (WiFi.status() != WL_CONNECTED) {
-         if (offline_mode) break;
-         Serial.print("Connecting to ");
-         Serial.print(ssid);
-         Serial.println("...");
-         delay(1000);
-         if (WiFi.status() == WL_CONNECTED){
-            Serial.print("IP: ");
-            Serial.println(WiFi.localIP());
-         }
+    //verify internet connection
+    if ( (WiFi.status() != WL_CONNECTED) || !client.connect(clientID, mqtt_username, mqtt_password) ){
+        offline_mode = true;  
+       // Serial.println("Wifi Status:"); Serial.println(WiFi.status());
+       // Serial.println("In Offline Mode until Wi-fi and MQTT Server acess");
+    }
+    else{
+        offline_mode = false;  
+       //  Serial.print(ssid);
+       //  Serial.println(WiFi.localIP());
     }
    
-    //MQTT Connecting
-    while (!client.connect(clientID, mqtt_username, mqtt_password)) {
-        if (offline_mode) break;
-        Serial.println("Connecting to MQTT Broker...");
-    }
-
     //Serial Received Verify
     if (Serial.available()){
       Serials.ExecutaComandoSerial(&ADE7753);
@@ -122,11 +103,14 @@ void loop() {
       strcpy(atual.dev_id, dev_id);
       strcpy(atual.dev_abstract, dev_abstract);
       atual.voltage = ADE7753.ReadVRMS()*598.5;  //fator reducao do trafo + divisores de tensao
-      atual.current = ADE7753.ReadIRMS();
+      atual.current = ADE7753.ReadIRMS()*20.09;
+      atual.aparent_power = atual.current * atual.voltage;
       atual.frequency = 1/(ADE7753.ReadPERIOD(3579545));
 
       ADE7753.DisplayBufferUpdate(&atual, ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
       OLED.ShowCompleteView(&display, atual.display_buffer);  //shows buffer content on display 
+
+      Serial.println(time(nullptr));
 
    //Payload Upload
    if (threadTo(&last_upload_time, time_between_uploads)) {         

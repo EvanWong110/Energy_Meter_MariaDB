@@ -31,7 +31,7 @@
 
                 $hostname = "192.168.0.251";
                 $username = "admin";
-                $password = "cristian86";
+                $password = "password";
                 $db = "energymeter";
 
                 $dbconnect=mysqli_connect($hostname,$username,$password,$db);
@@ -39,7 +39,7 @@
                 if ($dbconnect->connect_error) {
                   die("Database connection failed: " . $dbconnect->connect_error);
                 }
-                $comando = "SELECT * FROM data WHERE timecode BETWEEN $time1 AND $time2";
+                $comando = "SELECT * FROM data WHERE timestamp BETWEEN $time1 AND $time2";
                 $query = mysqli_query($dbconnect, $comando)
                    or die (mysqli_error($dbconnect));
 
@@ -55,7 +55,7 @@
     if(isset($tamanho)){    
         while ($row = mysqli_fetch_array($query)) {
             $data[]=array(
-                (int) $row['timecode'], 
+                (int) $row['timestamp'], 
                 (float) $row['tensao'], 
                 (float) $row['corrente'],
                 (float) $row['pot_re'],

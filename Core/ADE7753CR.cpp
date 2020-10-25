@@ -343,13 +343,13 @@ long int ADE7753::SetLINECYC(long int value){
     return Read16(LINECYC);
 }
 
-float ADE7753::ReadVRMS(){  //returns a Vin
+float ADE7753::ReadVRMS(){  //returns a Vin CH2
     unsigned long media = 0;
     float value;
-    for (int i=0; i<60; i++)
-    {
-    WaitZeroCross();
-    media += Read24(VRMS);  
+    Read24(VRMS);
+    for (int i=0; i<60; i++){
+        if (WaitZeroCross()) break;
+        media += Read24(VRMS);  
     }
     media /= 60; 
     value = (media/1561400.000000*0.5);
@@ -358,13 +358,18 @@ float ADE7753::ReadVRMS(){  //returns a Vin
     return value;
 }
   
-float ADE7753::ReadIRMS(){ //returns a % of full range [0.5Vin]
-    unsigned long reg_value;
-    float percent;
-    WaitZeroCross();
-    reg_value = Read24(IRMS);
-    percent = (reg_value /1868467.00000)*100;   
-    return percent;
+float ADE7753::ReadIRMS(){ //returns a Vin CH1
+    unsigned long media = 0;
+    float value;
+    Read24(IRMS);
+    for (int i=0; i<60; i++){
+        if (WaitZeroCross()) break;
+        media += Read24(IRMS);  
+    }
+    media /= 60; 
+    value = (media/1868467.00000)*0.5;   
+    value *= 0.7013;
+    return value;
 }
 
 float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
@@ -518,13 +523,14 @@ unsigned long ADE7753::ValorMedio(int qtde_amostras, unsigned long (*function)(c
 }
 
 int ADE7753::WaitZeroCross(){  //returns 0 when ZeroCross
-    unsigned long value = 0;
+    boolean value = 0;
     unsigned long conta_millis = millis();
     ResetaStatusReg();
     while (!CheckZeroCrossing()) {
-        if (millis() > (conta_millis+1000)){
+        if (millis() > (conta_millis+100)){
             Serial.println("ZX ERROR");
             value = 1;
+            delay(100);
             break;
         }    
     }
