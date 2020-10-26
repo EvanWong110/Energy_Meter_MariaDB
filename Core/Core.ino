@@ -107,9 +107,9 @@ void loop() {
       atual.current = ADE7753.ReadIRMS()*20.09;
       atual.aparent_power = atual.current * atual.voltage;
       atual.frequency = 1/(ADE7753.ReadPERIOD(3579545));
-      ADE7753.ReadEnergy(&atual.active_energy, &atual.apparent_energy, &atual.reactive_energy, &atual.FP);
-      //atual.active_power = atual.aparent_power * atual.FP;
-      //atual.reactive_power = atual.aparent_power * sin(acos(atual.FP));
+      ADE7753.ReadEnergy(120, &atual.active_energy, &atual.apparent_energy, &atual.reactive_energy, &atual.FP);
+      atual.active_power = atual.aparent_power * atual.FP;
+      atual.reactive_power = atual.aparent_power * sin(acos(atual.FP));
 
       ADE7753.DisplayBufferUpdate(&atual, ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
       OLED.ShowCompleteView(&display, atual.display_buffer);  //shows buffer content on display 

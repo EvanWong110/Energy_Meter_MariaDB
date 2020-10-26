@@ -22,109 +22,109 @@ void ADE7753::Closes()
 }
 
 void ADE7753::EnableHPF(){
-    UnsetBits(MODE, DISHPF);
+    UnsetBits(MODE_U, DISHPF);
 }
 
 void ADE7753::DisableHPF(){
-    SetBits(MODE, DISHPF);
+    SetBits(MODE_U, DISHPF);
 }
 
 void ADE7753::EnableLPF2(){
-    UnsetBits(MODE, DISLPF2);
+    UnsetBits(MODE_U, DISLPF2);
 }
 
 void ADE7753::DisableLPF2(){
-    SetBits(MODE, DISLPF2);
+    SetBits(MODE_U, DISLPF2);
 }
 
 void ADE7753::EnableCF(){
-    UnsetBits(MODE, DISCF);
+    UnsetBits(MODE_U, DISCF);
 }
 
 void ADE7753::DisableCF(){
-    SetBits(MODE, DISCF);
+    SetBits(MODE_U, DISCF);
 }
 void ADE7753::EnableSAGDetection(){
-    UnsetBits(MODE, DISSAG);
+    UnsetBits(MODE_U, DISSAG);
 } 
 
 void ADE7753::DisableSAGDetection(){
-    SetBits(MODE, DISSAG);
+    SetBits(MODE_U, DISSAG);
 }
 
 void ADE7753::DisableADConverters(){
-    SetBits(MODE, ASUSPEND);
+    SetBits(MODE_U, ASUSPEND);
 }
 
 void ADE7753::EnableADConverters(){
-    UnsetBits(MODE, ASUSPEND);
+    UnsetBits(MODE_U, ASUSPEND);
 }
 
 void ADE7753::StartTemperatureMeasurement(){
-    SetBits(MODE, TEMPSEL);
+    SetBits(MODE_U, TEMPSEL);
 }
 
 void ADE7753::SoftReset(){
-    SetBits(MODE, SWRST);
+    SetBits(MODE_U, SWRST);
     delayMicroseconds(18);
 }
 
 void ADE7753::EnableAccumulationMode(){
-    SetBits(MODE, CYCMODE); 
+    SetBits(MODE_U, CYCMODE); 
 }
 
 void ADE7753::DisableAccumulationMode(){
-    UnsetBits(MODE, CYCMODE); 
+    UnsetBits(MODE_U, CYCMODE); 
 }
 
 void ADE7753::DisableCH1(){  
-    SetBits(MODE, DISCH1);
+    SetBits(MODE_U, DISCH1);
     Serial.println("CH1 AD Disabled");
     Serial.println(ReadModeReg(),BIN);
 }
 
 void ADE7753::DisableCH2(){
-    SetBits(MODE, DISCH2);
+    SetBits(MODE_U, DISCH2);
     Serial.println("CH2 AD Disabled");
     Serial.println(ReadModeReg(),BIN);
 }
 
 void ADE7753::EnableCH1(){
-    UnsetBits(MODE, DISCH1);
+    UnsetBits(MODE_U, DISCH1);
     Serial.println("CH1 AD Enabled");
     Serial.println(ReadModeReg(),BIN);
 }
 
 void ADE7753::EnableCH2(){
-    UnsetBits(MODE, DISCH2);
+    UnsetBits(MODE_U, DISCH2);
     Serial.println("CH2 AD Enabled");
     Serial.println(ReadModeReg(),BIN);
 }
 
 void ADE7753::DisableSwap(){
-    UnsetBits(MODE, SWAP);
+    UnsetBits(MODE_U, SWAP);
 }
 
 void ADE7753::EnableSwap(){
-    SetBits(MODE, SWAP);
+    SetBits(MODE_U, SWAP);
 }
 
 void ADE7753::SelectWaveformDataRate(int datarate){
     switch (datarate)
     {
     case 1:
-        UnsetBits(MODE, DTRT10);
-        SetBits(MODE, DTRT10_01);
+        UnsetBits(MODE_U, DTRT10);
+        SetBits(MODE_U, DTRT10_01);
         break;
     case 2:
-        UnsetBits(MODE, DTRT10);
-        SetBits(MODE, DTRT10_10);
+        UnsetBits(MODE_U, DTRT10);
+        SetBits(MODE_U, DTRT10_10);
         break;
     case 3:
-        SetBits(MODE, DTRT10_11);
+        SetBits(MODE_U, DTRT10_11);
         break;
     default:
-        UnsetBits(MODE, DTRT10);
+        UnsetBits(MODE_U, DTRT10);
         break;
     }
 }
@@ -133,223 +133,223 @@ void ADE7753::SelectWaveformDataSource(int datasource){
     switch (datasource)
     {
     case 2:
-        UnsetBits(MODE, WAVSEL10);
-        SetBits(MODE, WAVSEL10_10);
+        UnsetBits(MODE_U, WAVSEL10);
+        SetBits(MODE_U, WAVSEL10_10);
         break;
     case 3:
-        SetBits(MODE, WAVSEL10_11);
+        SetBits(MODE_U, WAVSEL10_11);
         break;
     default:
-        UnsetBits(MODE, WAVSEL10);
+        UnsetBits(MODE_U, WAVSEL10);
         break;
     }
 }    
     
 void ADE7753::EnableOnlyPositive(){
-    SetBits(MODE, POAM);
+    SetBits(MODE_U, POAM);
 }
 
 void ADE7753::DisableOnlyPositive(){
-    UnsetBits(MODE, POAM);
+    UnsetBits(MODE_U, POAM);
 }
 
 void ADE7753::EnableIRQActiveEnergyHalfFull(){
-    SetBits(IRQEN, AEHF);
+    SetBits(IRQEN_U, AEHF);
 }
 
 void ADE7753::DisableIRQActiveEnergyHalfFull(){
-    UnsetBits(IRQEN, AEHF);
+    UnsetBits(IRQEN_U, AEHF);
 }
 
 void ADE7753::EnableIRQSAG(){
-    SetBits(IRQEN, SAG);
+    SetBits(IRQEN_U, SAG);
 }
 
 void ADE7753::DisableIRQSAG(){
-    UnsetBits(IRQEN, SAG);
+    UnsetBits(IRQEN_U, SAG);
 }
 
 void ADE7753::EnableIRQCycleEnergyAccumulationEnd(){
-    SetBits(IRQEN, CYCEND);   
+    SetBits(IRQEN_U, CYCEND);   
 }
 
 void ADE7753::DisableIRQCycleEnergyAccumulationEnd(){
-    UnsetBits(IRQEN, CYCEND);   
+    UnsetBits(IRQEN_U, CYCEND);   
 }
 
 void ADE7753::EnableIRQNewWaveformData(){
-    SetBits(IRQEN, WSMP);   
+    SetBits(IRQEN_U, WSMP);   
 }
 
 void ADE7753::DisableIRQNewWaveformData(){
-    UnsetBits(IRQEN, WSMP);   
+    UnsetBits(IRQEN_U, WSMP);   
 }
 
 void ADE7753::EnableIRQZeroCrossing(){
-    SetBits(IRQEN, ZX);   
+    SetBits(IRQEN_U, ZX);   
 }
 
 void ADE7753::DisableIRQZeroCrossing(){
-    UnsetBits(IRQEN, ZX);   
+    UnsetBits(IRQEN_U, ZX);   
 }
 
 void ADE7753::EnableIRQTemperatureResults(){
-    SetBits(IRQEN, TEMP);   
+    SetBits(IRQEN_U, TEMP);   
 }
 
 void ADE7753::DisableIRQTemperatureResults(){
-    UnsetBits(IRQEN, TEMP);   
+    UnsetBits(IRQEN_U, TEMP);   
 }
 
 void ADE7753::EnableIRQActiveEnergyOverflow(){
-    SetBits(IRQEN, AEOF);   
+    SetBits(IRQEN_U, AEOF);   
 }
 
 void ADE7753::DisableIRQActiveEnergyOverflow(){
-    UnsetBits(IRQEN, AEOF);   
+    UnsetBits(IRQEN_U, AEOF);   
 }
 
 void ADE7753::EnableIRQCH2VlvlPeek(){
-    SetBits(IRQEN, PKV);   
+    SetBits(IRQEN_U, PKV);   
 }
 
 void ADE7753::DisableIRQCH2VlvlPeek(){
-    UnsetBits(IRQEN, PKV);   
+    UnsetBits(IRQEN_U, PKV);   
 }
 
 void ADE7753::EnableIRQCH1IlvlPeek(){
-    SetBits(IRQEN, PKI);   
+    SetBits(IRQEN_U, PKI);   
 }
 
 void ADE7753::DisableIRQCH1IlvlPeek(){
-    UnsetBits(IRQEN, PKI);   
+    UnsetBits(IRQEN_U, PKI);   
 }
 
 void ADE7753::EnableIRQAparentEnergyHalfFull(){
-    SetBits(IRQEN, VAEHF);   
+    SetBits(IRQEN_U, VAEHF);   
 }
 
 void ADE7753::DisableIRQAparentEnergyHalfFull(){
-    UnsetBits(IRQEN, VAEHF);   
+    UnsetBits(IRQEN_U, VAEHF);   
 }
 
 void ADE7753::EnableIRQAparentEnergyOverflow(){
-    SetBits(IRQEN, VAEOF);   
+    SetBits(IRQEN_U, VAEOF);   
 }
 
 void ADE7753::DisableIRQAparentEnergyOverflow(){
-    UnsetBits(IRQEN, VAEOF);   
+    UnsetBits(IRQEN_U, VAEOF);   
 }
 
 void ADE7753::EnableIRQZeroCrossingTimeout(){
-    SetBits(IRQEN, ZXTO);   
+    SetBits(IRQEN_U, ZXTO);   
 }
 
 void ADE7753::DisableIRQZeroCrossingTimeout(){
-    UnsetBits(IRQEN, ZXTO);   
+    UnsetBits(IRQEN_U, ZXTO);   
 }
 
 void ADE7753::EnablesIRQPowerChangeToPos(){
-    SetBits(IRQEN, PPOS);   
+    SetBits(IRQEN_U, PPOS);   
 }
 
 void ADE7753::DisablesIRQPowerChangeToPos(){
-    UnsetBits(IRQEN, PPOS);   
+    UnsetBits(IRQEN_U, PPOS);   
 }
 
 void ADE7753::EnablesIRQPowerChangeToNeg(){
-    SetBits(IRQEN, PNEG);   
+    SetBits(IRQEN_U, PNEG);   
 }
 
 void ADE7753::DisablesIRQPowerChangeToNeg(){
-    UnsetBits(IRQEN, PNEG);   
+    UnsetBits(IRQEN_U, PNEG);   
 }
 
 bool ADE7753::CheckActiveEnergyHalfFull(){
-    return(Read16(STATUS) & AEHF);
+    return(Read16(STATUS_U) & AEHF);
 }
 
 bool ADE7753::CheckSAG(){
-    return(Read16(STATUS) & SAG);
+    return(Read16(STATUS_U) & SAG);
 }
 
 bool ADE7753::CheckCycleEnergyAccumulationEnd(){
-    return(Read16(STATUS) & CYCEND);
+    return(Read16(STATUS_U) & CYCEND);
 }
 
 bool ADE7753::CheckNewWaveformData(){
-    return(Read16(STATUS) & WSMP);
+    return(Read16(STATUS_U) & WSMP);
 }
 
 bool ADE7753::CheckZeroCrossing(){
-    return(Read16(STATUS) & ZX);
+    return(Read16(STATUS_U) & ZX);
 }
 
 bool ADE7753::CheckTemperatureResults(){
-    return(Read16(STATUS) & TEMP);
+    return(Read16(STATUS_U) & TEMP);
 }
 
 bool ADE7753::CheckActiveEnergyOverflow(){
-    return(Read16(STATUS) & AEOF);
+    return(Read16(STATUS_U) & AEOF);
 }
 
 bool ADE7753::CheckCH2VlvlPeek(){
-    return(Read16(STATUS) & PKV);
+    return(Read16(STATUS_U) & PKV);
 }
 
 bool ADE7753::CheckCH1IlvlPeek(){
-    return(Read16(STATUS) & PKI);
+    return(Read16(STATUS_U) & PKI);
 }
 
 bool ADE7753::CheckAparentEnergyHalfFull(){
-    return(Read16(STATUS) & VAEHF);
+    return(Read16(STATUS_U) & VAEHF);
 }
 
 bool ADE7753::CheckAparentEnergyOverflow(){
-    return(Read16(STATUS) & VAEOF);
+    return(Read16(STATUS_U) & VAEOF);
 }
 
 bool ADE7753::CheckZeroCrossingTimeout(){
-    return(Read16(STATUS) & ZXTO);
+    return(Read16(STATUS_U) & ZXTO);
 }
 
 bool ADE7753::CheckPowerChangeToPos(){
-    return(Read16(STATUS) & PPOS);
+    return(Read16(STATUS_U) & PPOS);
 }
 
 bool ADE7753::CheckPowerChangeToNeg(){
-    return(Read16(STATUS) & PNEG);
+    return(Read16(STATUS_U) & PNEG);
 }
 
-long int ADE7753::ReadModeReg(){
-    return Read16(MODE);  
+unsigned long ADE7753::ReadModeReg(){
+    return Read16(MODE_U);  
 }
 
-long int ADE7753::ReadStatusReg(){
-    return Read16(STATUS);  
+unsigned long ADE7753::ReadStatusReg(){
+    return Read16(STATUS_U);  
 }
 
-long int ADE7753::ResetaStatusReg(){
-    return Read16(RSTSTATUS);
+unsigned long ADE7753::ResetStatusReg(){
+    return Read16(RSTSTATUS_U);
 }
 
-long int ADE7753::SetVRMSOS(long int value){
-    Write16(VRMSOS, value);
-    return Read16(VRMSOS);        
+long ADE7753::SetVRMSOS(long value){
+    Write16(VRMSOS_S, value);
+    return Read16(VRMSOS_S);        
 }
 
 unsigned long ADE7753::SetLINECYC(unsigned long value){
-    Write16(LINECYC, value);
-    return Read16(LINECYC);
+    Write16(LINECYC_U, value);
+    return Read16(LINECYC_U);
 }
 
 float ADE7753::ReadVRMS(){  //returns a Vin CH2
     unsigned long media = 0;
     float value;
-    Read24(VRMS);
+    Read24(VRMS_U);
     for (int i=0; i<60; i++){
         if (WaitZeroCross()) return 0;
-        media += Read24(VRMS);  
+        media += Read24(VRMS_U);  
     }
     media /= 60; 
     value = (media/1561400.000000*0.5);
@@ -361,10 +361,10 @@ float ADE7753::ReadVRMS(){  //returns a Vin CH2
 float ADE7753::ReadIRMS(){ //returns a Vin CH1
     unsigned long media = 0;
     float value;
-    Read24(IRMS);
+    Read24(IRMS_U);
     for (int i=0; i<60; i++){
         if (WaitZeroCross()) return 0;
-        media += Read24(IRMS);  
+        media += Read24(IRMS_U);  
     }
     media /= 60; 
     value = (media/1868467.00000)*0.5;   
@@ -375,40 +375,31 @@ float ADE7753::ReadIRMS(){ //returns a Vin CH1
 float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
     unsigned long reg_value;
     float period;
-    reg_value = Read16(PERIOD);
+    reg_value = Read16(PERIOD_U);
     period = (8.0000000*reg_value)/CLKIN;
     return period;
 }
 
-void ADE7753::ReadEnergy(float* active_energy, float* apparent_energy, float* reactive_energy, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
+void ADE7753::ReadEnergy(int half_line_cycles, float* active_energy, float* apparent_energy, float* reactive_energy, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
+    long active_value, reactive_value;
     unsigned long apparent_value;
-    
     Serial.println("aqui inicio");
-    SetLINECYC(240);
+    SetLINECYC(half_line_cycles);
     EnableAccumulationMode();
-    ResetaStatusReg();
+    ResetStatusReg();
     unsigned long conta_millis = millis();
     while (!CheckCycleEnergyAccumulationEnd()) {
         delay(10);
-     //   if (millis() > conta_millis+2000) break;
     }
-    Serial.println("aqui meio");  
-    ResetaStatusReg();
-    while (!CheckCycleEnergyAccumulationEnd()) {
-        delay(10);
-       // if (millis() > conta_millis+2000) break;
-    }
-    Serial.println("aqui fim");
-    active_value = Read24(LAENERGY);
+    active_value = Read24(LAENERGY_S);
     Serial.println(active_value);
-    apparent_value = Read24(LVAENERGY);
+    apparent_value = Read24(LVAENERGY_U);
     Serial.println(apparent_value);
-    reactive_value = Read24(LVARENERGY);
+    reactive_value = Read24(LVARENERGY_S);
     Serial.println(reactive_value);
     *power_factor = active_value / apparent_value;
 }
 
-      
 void ADE7753::DisplayBufferUpdate(Measurement* data, int view, boolean next)  
 {
     switch (view){
@@ -533,7 +524,7 @@ void ADE7753::Write16(char reg, unsigned long value){
 int ADE7753::WaitZeroCross(){  //returns 0 when ZeroCross
     boolean value = 0;
     unsigned long conta_millis = millis();
-    ResetaStatusReg();
+    ResetStatusReg();
     while (!CheckZeroCrossing()) {
         if (millis() > (conta_millis+100)){
             Serial.println("ZX ERROR");

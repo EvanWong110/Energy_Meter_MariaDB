@@ -12,177 +12,177 @@
   //------------------------
   // Lista de registradores 
   //------------------------
-  #define WAVEFORM 0x01   
+  #define WAVEFORM_S 0x01   
   /*This read-only register contains the sampled waveform
   data from either Channel 1, Channel 2, or the active power signal. The data
   source and the length of the waveform registers are selected by data
   Bits 14 and 13 in the mode register */
-  #define AENERGY 0x02    
+  #define AENERGY_S 0x02    
   /*Active Energy Register. Active power is accumulated (integrated) over time
   in this 24-bit, read-only register*/
-  #define RAENERGY 0x03   
+  #define RAENERGY_S 0x03   
   /*Same as the active energy register except that the register is reset to 0
   following a read operation.*/ 
-  #define LAENERGY 0x04   
+  #define LAENERGY_S 0x04   
   /*Line Accumulation Active Energy Register. The instantaneous active power
   is accumulated in this read-only register over the LINECYC number of half
   line cycles.*/
-  #define VAENERGY 0x05   
+  #define VAENERGY_U 0x05   
   /*Apparent Energy Register. Apparent power is accumulated over time in this
   read-only register. */
-  #define RVAENERGY 0x06  
+  #define RVAENERGY_U 0x06  
   /*Same as the VAENERGY register except that the register is reset to 0
   following a read operation.*/ 
-  #define LVAENERGY 0x07  
+  #define LVAENERGY_U 0x07  
   /*Line Accumulation Apparent Energy Register. The instantaneous real power
   is accumulated in this read-only register over the LINECYC number of half
   line cycles. */
-  #define LVARENERGY 0x08 
+  #define LVARENERGY_S 0x08 
   /*Line Accumulation Reactive Energy Register. The instantaneous reactive
   power is accumulated in this read-only register over the LINECYC number
   of half line cycles.*/ 
-  #define MODE 0x09       
+  #define MODE_U 0x09       
   /*Mode Register. This is a 16-bit register through which most of the ADE7753
   functionality is accessed. Signal sample rates, filter enabling, and
   calibration modes are selected by writing to this register. The contents can
   be read at any time*/
-  #define IRQEN 0x0A      
+  #define IRQEN_U 0x0A      
   /*Interrupt Enable Register. ADE7753 interrupts can be deactivated at any time
   by setting the corresponding bit in this 16- bit enable register to Logic 0.
   The status register continues to register an interrupt event even if disabled.
   However, the IRQ output is not activated*/
-  #define STATUS 0x0B     
+  #define STATUS_U 0x0B     
   /*Interrupt Status Register. This is an 16-bit read-only register. The status
   register contains information regarding the source of ADE7753
   interrupts*/
-  #define RSTSTATUS 0x0C  
+  #define RSTSTATUS_U 0x0C  
   /*Same as the interrupt status register except that the register contents are
   reset to 0 (all flags cleared) after a read operation. */
-  #define CH1OS 0x0D      
+  #define CH1OS_SS 0x0D      
   /* Channel 1 Offset Adjust. Bit 6 is not used. Writing to Bits 0 to 5 allows
   offsets on Channel 1 to be removed—see the Analog Inputs and CH1OS
   Register (0x0D) sections. Writing a Logic 1 to the MSB of this register
   enables the digital integrator on Channel 1, a Logic 0 disables the
   integrator. The default value of this bit is 0. */
-  #define CH2OS 0x0E
+  #define CH2OS_SS 0x0E
   /* Channel 2 Offset Adjust. Bits 6 and 7 are not used. Writing to Bits 0 to 5 of
   this register allows any offsets on Channel 2 to be removed—see the
   Analog Inputs section. Note that the CH2OS register is inverted. To apply a
   positive offset, a negative number is written to this register. 
   */
-  #define GAIN 0x0F
+  #define GAIN_U 0x0F
   /* PGA Gain Adjust. This 8-bit register is used to adjust the gain selection for
   the PGA in Channels 1 and 2.
   */
-  #define PHCAL 0x10
+  #define PHCAL_S 0x10
   /* Phase Calibration Register. The phase relationship between Channel 1 and
   2 can be adjusted by writing to this 6-bit register. The valid content of this
   twos compliment register is between 0x1D to 0x21. At a line frequency of
   60 Hz, this is a range from –2.06° to +0.7°
   */
-  #define APOS 0x11
+  #define APOS_S 0x11
   /* Active Power Offset Correction. This 16-bit register allows small offsets in
   the active power calculation to be removed—see the Active Power
   Calculation section. 
   */
-  #define WGAIN 0x12
+  #define WGAIN_S 0x12
   /* Power Gain Adjust. This is a 12-bit register. The active power calculation can
   be calibrated by writing to this register. The calibration range is ±50% of
   the nominal full-scale active power. The resolution of the gain adjust is
   0.0244%/LSB
   */
-  #define WDIV 0x13
+  #define WDIV_U 0x13
   /* Active Energy Divider Register. The internal active energy register is divided
   by the value of this register before being stored in the AENERGY register. 
   */
-  #define CFNUM 0x14
+  #define CFNUM_U 0x14
   /* CF Frequency Divider Numerator Register. The output frequency on the CF
   pin is adjusted by writing to this 12-bit read/write register
   */
-  #define CFDEN 0x15
+  #define CFDEN_U 0x15
   /* CF Frequency Divider Denominator Register. The output frequency on the
   CF pin is adjusted by writing to this 12-bit read/write register
   */
-  #define IRMS 0x16
+  #define IRMS_U 0x16
   /* Channel 1 RMS Value (Current Channel). 
   */
-  #define VRMS 0x17
+  #define VRMS_U 0x17
   /* Channel 2 RMS Value (Voltage Channel). 
   */
-  #define IRMSOS 0x18
+  #define IRMSOS_S 0x18
   /* Channel 1 RMS Offset Correction Register. 
   */
-  #define VRMSOS 0x19
+  #define VRMSOS_S 0x19
   /* Channel 2 RMS Offset Correction Register. 
   */
-  #define VAGAIN 0x1A
+  #define VAGAIN_S 0x1A
   /* Apparent Gain Register. Apparent power calculation can be calibrated by
   writing to this register. The calibration range is 50% of the nominal fullscale real power. The resolution of the gain adjust is 0.02444%/LSB. 
   */
-  #define VADIV 0x1B
+  #define VADIV_U 0x1B
   /* Apparent Energy Divider Register. The internal apparent energy register is
   divided by the value of this register before being stored in the VAENERGY
   register. 
   */
-  #define LINECYC 0x1C
+  #define LINECYC_U 0x1C
   /* Line Cycle Energy Accumulation Mode Line-Cycle Register. This 16-bit
   register is used during line cycle energy accumulation mode to set the
   number of half line cycles for energy accumulation
   */
-  #define ZXTOUT 0x1D
+  #define ZXTOUT_U 0x1D
   /* Zero-Crossing Timeout. If no zero crossings are detected on Channel 2
   within a time period specified by this 12-bit register, the interrupt request
   line (IRQ) is activated
   */
-  #define SAGCYC 0x1E
+  #define SAGCYC_U 0x1E
   /* Sag Line Cycle Register. This 8-bit register specifies the number of
   consecutive line cycles the signal on Channel 2 must be below SAGLVL
   before the SAG output is activated
   */
-  #define SAGLVL 0x1F
+  #define SAGLVL_U 0x1F
   /* Sag Voltage Level. An 8-bit write to this register determines at what peak
   signal level on Channel 2 the SAG pin becomes active. The signal must
   remain low for the number of cycles specified in the SAGCYC register
   before the SAG pin is activated
   */
-  #define IPKLVL 0x20
+  #define IPKLVL_U 0x20
   /* Channel 1 Peak Level Threshold (Current Channel). This register sets the
   level of the current peak detection. If the Channel 1 input exceeds this
   level, the PKI flag in the status register is set. 
   */
-  #define VPKLVL 0x21
+  #define VPKLVL_U 0x21
   /* Channel 2 Peak Level Threshold (Voltage Channel). This register sets the
   level of the voltage peak detection. If the Channel 2 input exceeds this
   level, the PKV flag in the status register is set. 
   */
-  #define IPEAK 0x22
+  #define IPEAK_U 0x22
   /* Channel 1 Peak Register. The maximum input value of the current channel
   since the last read of the register is stored in this register. 
   */
-  #define RSTIPEAK 0x23
+  #define RSTIPEAK_U 0x23
   /* Same as Channel 1 Peak Register except that the register contents are reset
   to 0 after read.
   */
-  #define VPEAK 0x24
+  #define VPEAK_U 0x24
   /* Channel 2 Peak Register. The maximum input value of the voltage channel
   since the last read of the register is stored in this register. 
   */
-  #define RSTVPEAK 0x25
+  #define RSTVPEAK_U 0x25
   /* Same as Channel 2 Peak Register except that the register contents are reset
   to 0 after a read. 
   */
-  #define TEMP 0x26
+  #define TEMP_S 0x26
   /* Temperature Register. This is an 8-bit register which contains the result of
   the latest temperature conversion
   */
-  #define PERIOD 0x27
+  #define PERIOD_U 0x27
   /* Period of the Channel 2 (Voltage Channel) Input Estimated by ZeroCrossing Processing. The MSB of this register is always zero. 
   */
-  #define CHKSUM 0x3E 
+  #define CHKSUM_U 0x3E 
   /* Checksum Register. This 6-bit read-only register is equal to the sum of all
   the ones in the previous read
   */
-  #define DIEREV 0x3F
+  #define DIEREV_U 0x3F
   /* Die Revision Register. This 8-bit read-only register contains the revision
   number of the silicon. 
   */ 
@@ -380,18 +380,17 @@
       bool CheckPowerChangeToPos();
       bool CheckPowerChangeToNeg();
       
-      
-      long int ReadModeReg();
-      long int ReadStatusReg();
-      long int ResetaStatusReg();
+      unsigned long ReadModeReg();
+      unsigned long ReadStatusReg();
+      unsigned long ResetStatusReg();
 
-      long int SetVRMSOS(long int value);
+      long SetVRMSOS(long value);
       unsigned long SetLINECYC(unsigned long value);
       
       float ReadVRMS();
       float ReadIRMS();
       float ReadPERIOD(int CLKIN);
-      void ReadEnergy(float* active_energy, float* apparent_energy, float* reactive_energy, float* power_factor);
+      void ReadEnergy(int half_line_cycles, float* active_energy, float* apparent_energy, float* reactive_energy, float* power_factor);
       void DisplayBufferUpdate(Measurement* data, int view = 1, boolean next = 0);
       int GetDisplayPosition();
       
