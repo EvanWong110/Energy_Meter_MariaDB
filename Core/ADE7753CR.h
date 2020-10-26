@@ -293,6 +293,9 @@
         float active_power = 0;
         float reactive_power = 0;
         float aparent_power = 0;
+        float active_energy = 0;
+        float reactive_energy = 0;
+        float apparent_energy = 0;
         float FP = 0;
         unsigned long timestamp = 0;
       } Measurement;
@@ -383,12 +386,12 @@
       long int ResetaStatusReg();
 
       long int SetVRMSOS(long int value);
-      long int SetLINECYC(long int value);
+      unsigned long SetLINECYC(unsigned long value);
       
       float ReadVRMS();
       float ReadIRMS();
       float ReadPERIOD(int CLKIN);
-      float ReadActiveEnergy();
+      void ReadEnergy(float* active_energy, float* apparent_energy, float* reactive_energy, float* power_factor);
       void DisplayBufferUpdate(Measurement* data, int view = 1, boolean next = 0);
       int GetDisplayPosition();
       
@@ -403,7 +406,6 @@
       unsigned long Read24(char reg);
       void Write8(char reg, unsigned long value);
       void Write16(char reg, unsigned long value);
-      unsigned long ValorMedio(int qtde_amostras, unsigned long (*function)(char), char reg );
       int WaitZeroCross();
       int display_position = 1;
   };

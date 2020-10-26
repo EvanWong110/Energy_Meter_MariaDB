@@ -8,6 +8,7 @@
 
 #include <ESP8266WiFi.h>      
 #include <time.h>             
+#include <math.h>
 #include "ADE7753CR.h"
 #include "OLEDCR.h"
 #include "PUBLISHERCR.h"
@@ -106,21 +107,21 @@ void loop() {
       atual.current = ADE7753.ReadIRMS()*20.09;
       atual.aparent_power = atual.current * atual.voltage;
       atual.frequency = 1/(ADE7753.ReadPERIOD(3579545));
+      ADE7753.ReadEnergy(&atual.active_energy, &atual.apparent_energy, &atual.reactive_energy, &atual.FP);
+      //atual.active_power = atual.aparent_power * atual.FP;
+      //atual.reactive_power = atual.aparent_power * sin(acos(atual.FP));
 
       ADE7753.DisplayBufferUpdate(&atual, ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
       OLED.ShowCompleteView(&display, atual.display_buffer);  //shows buffer content on display 
 
-      Serial.println(time(nullptr));
 
    //Payload Upload
-   if (threadTo(&last_upload_time, time_between_uploads)) {         
-      piscaled(1, 100);
-      if (!offline_mode){
-          atual.timestamp = setClock();
+      if (threadTo(&last_upload_time, time_between_uploads)) {         
+            piscaled(1, 100);
+            atual.timestamp = setClock();
+            Publisher.CreateMessage(atual);
+            if (!offline_mode){
+                  Publisher.PublishMessage(&client, mqtt_topic);
+            }
       }
-      Publisher.CreateMessage(atual);
-      if (!offline_mode){
-            Publisher.PublishMessage(&client, mqtt_topic);
-      }
-   }
 }

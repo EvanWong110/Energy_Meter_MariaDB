@@ -266,59 +266,59 @@ void ADE7753::DisablesIRQPowerChangeToNeg(){
 }
 
 bool ADE7753::CheckActiveEnergyHalfFull(){
-    return(Read16(RSTSTATUS) & AEHF);
+    return(Read16(STATUS) & AEHF);
 }
 
 bool ADE7753::CheckSAG(){
-    return(Read16(RSTSTATUS) & SAG);
+    return(Read16(STATUS) & SAG);
 }
 
 bool ADE7753::CheckCycleEnergyAccumulationEnd(){
-    return(Read16(RSTSTATUS) & CYCEND);
+    return(Read16(STATUS) & CYCEND);
 }
 
 bool ADE7753::CheckNewWaveformData(){
-    return(Read16(RSTSTATUS) & WSMP);
+    return(Read16(STATUS) & WSMP);
 }
 
 bool ADE7753::CheckZeroCrossing(){
-    return(Read16(RSTSTATUS) & ZX);
+    return(Read16(STATUS) & ZX);
 }
 
 bool ADE7753::CheckTemperatureResults(){
-    return(Read16(RSTSTATUS) & TEMP);
+    return(Read16(STATUS) & TEMP);
 }
 
 bool ADE7753::CheckActiveEnergyOverflow(){
-    return(Read16(RSTSTATUS) & AEOF);
+    return(Read16(STATUS) & AEOF);
 }
 
 bool ADE7753::CheckCH2VlvlPeek(){
-    return(Read16(RSTSTATUS) & PKV);
+    return(Read16(STATUS) & PKV);
 }
 
 bool ADE7753::CheckCH1IlvlPeek(){
-    return(Read16(RSTSTATUS) & PKI);
+    return(Read16(STATUS) & PKI);
 }
 
 bool ADE7753::CheckAparentEnergyHalfFull(){
-    return(Read16(RSTSTATUS) & VAEHF);
+    return(Read16(STATUS) & VAEHF);
 }
 
 bool ADE7753::CheckAparentEnergyOverflow(){
-    return(Read16(RSTSTATUS) & VAEOF);
+    return(Read16(STATUS) & VAEOF);
 }
 
 bool ADE7753::CheckZeroCrossingTimeout(){
-    return(Read16(RSTSTATUS) & ZXTO);
+    return(Read16(STATUS) & ZXTO);
 }
 
 bool ADE7753::CheckPowerChangeToPos(){
-    return(Read16(RSTSTATUS) & PPOS);
+    return(Read16(STATUS) & PPOS);
 }
 
 bool ADE7753::CheckPowerChangeToNeg(){
-    return(Read16(RSTSTATUS) & PNEG);
+    return(Read16(STATUS) & PNEG);
 }
 
 long int ADE7753::ReadModeReg(){
@@ -326,7 +326,7 @@ long int ADE7753::ReadModeReg(){
 }
 
 long int ADE7753::ReadStatusReg(){
-    return Read16(RSTSTATUS);  
+    return Read16(STATUS);  
 }
 
 long int ADE7753::ResetaStatusReg(){
@@ -338,7 +338,7 @@ long int ADE7753::SetVRMSOS(long int value){
     return Read16(VRMSOS);        
 }
 
-long int ADE7753::SetLINECYC(long int value){
+unsigned long ADE7753::SetLINECYC(unsigned long value){
     Write16(LINECYC, value);
     return Read16(LINECYC);
 }
@@ -348,7 +348,7 @@ float ADE7753::ReadVRMS(){  //returns a Vin CH2
     float value;
     Read24(VRMS);
     for (int i=0; i<60; i++){
-        if (WaitZeroCross()) break;
+        if (WaitZeroCross()) return 0;
         media += Read24(VRMS);  
     }
     media /= 60; 
@@ -363,7 +363,7 @@ float ADE7753::ReadIRMS(){ //returns a Vin CH1
     float value;
     Read24(IRMS);
     for (int i=0; i<60; i++){
-        if (WaitZeroCross()) break;
+        if (WaitZeroCross()) return 0;
         media += Read24(IRMS);  
     }
     media /= 60; 
@@ -380,13 +380,32 @@ float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
     return period;
 }
 
-float ADE7753::ReadActiveEnergy(){ //return active energy in Watt-Hour still needs calibration to work
-    unsigned long value;
+void ADE7753::ReadEnergy(float* active_energy, float* apparent_energy, float* reactive_energy, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
+    unsigned long apparent_value;
+    
+    Serial.println("aqui inicio");
+    SetLINECYC(240);
     EnableAccumulationMode();
-    SetLINECYC(60);
-    CheckCycleEnergyAccumulationEnd();
-    value = Read24(LAENERGY);
-    return value;
+    ResetaStatusReg();
+    unsigned long conta_millis = millis();
+    while (!CheckCycleEnergyAccumulationEnd()) {
+        delay(10);
+     //   if (millis() > conta_millis+2000) break;
+    }
+    Serial.println("aqui meio");  
+    ResetaStatusReg();
+    while (!CheckCycleEnergyAccumulationEnd()) {
+        delay(10);
+       // if (millis() > conta_millis+2000) break;
+    }
+    Serial.println("aqui fim");
+    active_value = Read24(LAENERGY);
+    Serial.println(active_value);
+    apparent_value = Read24(LVAENERGY);
+    Serial.println(apparent_value);
+    reactive_value = Read24(LVARENERGY);
+    Serial.println(reactive_value);
+    *power_factor = active_value / apparent_value;
 }
 
       
@@ -458,7 +477,7 @@ unsigned long ADE7753::Read8(char reg){
     SPI.transfer(reg);
     delayMicroseconds(5);
     b0=SPI.transfer(0x81);
-    delayMicroseconds(150);
+    delayMicroseconds(50);
     Disable();
     return (unsigned long)b0;
 }
@@ -509,17 +528,6 @@ void ADE7753::Write16(char reg, unsigned long value){
     SPI.transfer(value&0xFF); //envia os 8 bits menos significativos
     delayMicroseconds(50);
     Disable();
-}
-
-unsigned long ADE7753::ValorMedio(int qtde_amostras, unsigned long (*function)(char), char reg ){
-  unsigned long media = 0;
-  for (int x=0; x<qtde_amostras; x++)
-    {
-      WaitZeroCross();
-      media = media + (*function)(reg);
-    }  
-    media = media / qtde_amostras;
-    return media;
 }
 
 int ADE7753::WaitZeroCross(){  //returns 0 when ZeroCross
