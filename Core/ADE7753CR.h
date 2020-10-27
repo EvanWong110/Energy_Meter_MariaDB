@@ -390,7 +390,7 @@
       float ReadVRMS();
       float ReadIRMS();
       float ReadPERIOD(int CLKIN);
-      void ReadEnergy(int half_line_cycles, float* active_energy, float* apparent_energy, float* reactive_energy, float* power_factor);
+      void ReadEnergy(int half_line_cycles, float* power_factor);
       void DisplayBufferUpdate(Measurement* data, int view = 1, boolean next = 0);
       int GetDisplayPosition();
       

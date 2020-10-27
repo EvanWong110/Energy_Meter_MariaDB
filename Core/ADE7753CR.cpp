@@ -381,7 +381,7 @@ float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
     return period;
 }
 
-void ADE7753::ReadEnergy(int half_line_cycles, float* active_energy, float* apparent_energy, float* reactive_energy, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
+void ADE7753::ReadEnergy(int half_line_cycles, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
     long active_value, reactive_value;
     long apparent_value;
     SetLINECYC(half_line_cycles);
@@ -391,6 +391,7 @@ void ADE7753::ReadEnergy(int half_line_cycles, float* active_energy, float* appa
     while (!CheckCycleEnergyAccumulationEnd()) {
         delayMicroseconds(5);
     }
+
     active_value = Read24(LAENERGY_S);      
     apparent_value = Read24(LVAENERGY_U);
     reactive_value = Read24(LVARENERGY_S);    
