@@ -407,7 +407,6 @@ void ADE7753::ReadEnergy(int half_line_cycles, float* power_factor){ //return ac
     active_value *=(0.827/12.1031); //energy scales // W conversion
     apparent_value /= 12.1031; //VA conversion
     reactive_value *=(0.204 / (0.827*12.1031)); //energy scales / VAr conversion
-    Serial.println(active_value);
     *power_factor =  ((active_value*1.000000) / apparent_value);
     if (isnan(*power_factor)) *power_factor = 0;
     if (*power_factor >= 1) *power_factor = 0.9999999999;

@@ -43,8 +43,8 @@ PubSubClient client(mqtt_server, 1883, wifiClient);
 SSD1306Wire display(0x3c, SDA_PIN, SCK_PIN);
 OLED OLED;
 ADE7753 ADE7753;
-ADE7753::Measurement buff[14400];
-ADE7753::Measurement * atual = buff[0];
+ADE7753::Measurement buff[200];
+ADE7753::Measurement* atual;
 Publisher Publisher;
 Serials Serials;
 
@@ -61,7 +61,7 @@ boolean threadTo(unsigned long* last_time, unsigned long default_time){
 
 unsigned long setClock() { 
   configTime(0 * 3600, 0, "pool.ntp.org", "time.nist.gov");
-  Serial.print("Getting NTP time sync... ");
+  Serial.println("Getting NTP time sync... ");
   time_t now = time(nullptr);
   return now;  
 }
@@ -83,6 +83,7 @@ void setup(){
   pinMode(LED_EXTERNAL, OUTPUT);
   ADE7753.Init(CSPIN);
   OLED.Init(&display);
+  atual = &buff[0];
 }
 
 void loop() {
@@ -114,6 +115,7 @@ void loop() {
 
    //Payload Upload
       if (threadTo(&last_upload_time, time_between_uploads)) {         
+            Serial.println(ind);
             piscaled(1, 100);
             atual->timestamp = setClock();
             if (!offline_mode){

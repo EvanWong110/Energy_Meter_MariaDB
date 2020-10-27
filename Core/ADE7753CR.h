@@ -284,9 +284,9 @@
   {
     public:
       typedef struct {
-        char dev_id[50] = "0";
-        char dev_abstract[200] = "device descriptor";
-        char display_buffer[50];
+        char dev_id[5] = "0";
+        char dev_abstract[30] = "device descriptor";
+        char display_buffer[30];
         float voltage = 0;
         float current = 0;
         float frequency = 0;
