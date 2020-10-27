@@ -383,20 +383,33 @@ float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
 
 void ADE7753::ReadEnergy(int half_line_cycles, float* active_energy, float* apparent_energy, float* reactive_energy, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
     long active_value, reactive_value;
-    unsigned long apparent_value;
-    EnableAccumulationMode();
+    long apparent_value;
     SetLINECYC(half_line_cycles);
+    EnableAccumulationMode();
     ResetStatusReg();
+    delay(17);
     while (!CheckCycleEnergyAccumulationEnd()) {
-        delay(10);
+        delayMicroseconds(5);
     }
-    active_value = (0xffffff) & ~(Read24(LAENERGY_S));
-    Serial.println(active_value);
+    active_value = Read24(LAENERGY_S);      
     apparent_value = Read24(LVAENERGY_U);
-    Serial.println(apparent_value);
-    reactive_value = (0xffffff) & ~(Read24(LVARENERGY_S));
-    Serial.println(reactive_value);
-    *power_factor = active_value*1.000000 / apparent_value;
+    reactive_value = Read24(LVARENERGY_S);    
+    
+    // 2s complement conversion
+    if (active_value & 1 << 23) {   
+      active_value = ((~active_value) & 0xffffff);
+    }
+    if (reactive_value & 1 << 23) {
+      reactive_value = ((~reactive_value) & 0xffffff);
+    }
+    
+    active_value *=(0.827/12.1031); //energy scales // W conversion
+    apparent_value /= 12.1031; //VA conversion
+    reactive_value *=(0.204 / (0.827*12.1031)); //energy scales / VAr conversion
+    Serial.println(active_value);
+    *power_factor =  ((active_value*1.000000) / apparent_value);
+    if (isnan(*power_factor)) *power_factor = 0;
+    if (*power_factor >= 1) *power_factor = 0.9999999999;
 }
 
 void ADE7753::DisplayBufferUpdate(Measurement* data, int view, boolean next)  
