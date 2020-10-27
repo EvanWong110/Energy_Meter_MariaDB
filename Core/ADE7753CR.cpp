@@ -380,7 +380,7 @@ float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
     return period;
 }
 
-void ADE7753::ReadEnergy(int half_line_cycles, float* active_energy, float* apparent_energy, float* reactive_energy, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
+void ADE7753::ReadEnergy(int half_line_cycles, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
     long active_value, reactive_value;
     unsigned long apparent_value;
     Serial.println("aqui inicio");
@@ -392,11 +392,8 @@ void ADE7753::ReadEnergy(int half_line_cycles, float* active_energy, float* appa
         delay(10);
     }
     active_value = Read24(LAENERGY_S);
-    Serial.println(active_value);
     apparent_value = Read24(LVAENERGY_U);
-    Serial.println(apparent_value);
     reactive_value = Read24(LVARENERGY_S);
-    Serial.println(reactive_value);
     *power_factor = active_value / apparent_value;
 }
 
