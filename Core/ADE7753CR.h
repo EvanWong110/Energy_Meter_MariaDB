@@ -314,7 +314,7 @@
       void EnableADConverters();
       void StartTemperatureMeasurement();
       void SoftReset();
-      void EnableAccumulationMode();
+      unsigned long EnableAccumulationMode();
       void DisableAccumulationMode();
       void DisableCH1(); //Puts inputs internally in short
       void DisableCH2();
