@@ -1,0 +1,2 @@
+trocar transformador 6+6
+alterar resistor p 0,5 peak (max)

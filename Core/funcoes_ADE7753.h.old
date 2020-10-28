@@ -5,7 +5,6 @@
 #include <math.h>
 #define CLOCKIN 3579545            // Clock do ADE
 
-#define CS_PIN D8                  // SPI Pin
 
 // Lista de registradores 
 #define WAVEFORM 0x01

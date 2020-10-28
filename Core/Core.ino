@@ -1,4 +1,4 @@
-/* * Nome do arquivo: Core.h
+ /* Nome do arquivo: Core.ino
  * Este é o arquivo main() que possui o setup e o loop principal do programa
  * 
  * Feito por Cristian Fernando Ritter
@@ -6,148 +6,145 @@
  * Todos os direitos reservados
  */
 
-#include <ESP8266WiFi.h>      // Bibliote de suporte a wifi do módulo ESP8266
-#include <SPI.h>              // Biblioteca de suporte a comunicação SPI
-#include "SSD1306Wire.h"      // Bibliote de suporte ao Display OLED
-#include <time.h>             // Biblioteca com funções relacionadas a fuso horário
-#include <PubSubClient.h>     // Biblioteca para publicacao MQTT na AWS
-#include "funcoes_ADE7753.h"  // funcões dos registradores ADE7753
-#include "ADE7753CR/ADE7753CR.h"
+#include <ESP8266WiFi.h>      
+#include <time.h>             
+#include <math.h>
+#include "ADE7753CR.h"
+#include "OLEDCR.h"
+#include "PUBLISHERCR.h"
+#include "SERIALCR.h"
 
-typedef struct {
-    char id[20] = "";
-    long timestamp = 0;
-    float tensao = 0;
-    float corrente = 0;
-    float frequencia = 0;
-    float pot_at = 0;
-    float pot_re = 0;
-    float pot_ap = 0;
-    float FP = 0;
-    bool SAG = 0;
-    bool sobretensao = 0;
-    bool sobrecorrente = 0;
-    bool crossing_timeout = 0;
-    bool pot_positiva = 0;
-} mensagem;
+#define SDA_PIN D1  // OLED SDA Pin
+#define SCK_PIN D2  // OLED SCK Pin
+#define LED_EXTERNAL D3  
+#define SW_PIN D4  // Display change views
+#define CSPIN D8  // ADE7753 SPI Enable Pin
+#define upload_interval_on 10000 //ms                        // Tempo entre uploads
+#define upload_interval_off 300000 //ms                        // Tempo entre uploads
+#define debaunce_time 250                                      // Debaunce da chave do display
+#define indices_size 250
+#define serial_speed 115200        // Serial port speed
 
-mensagem atual;
-
-
-#include "funcoes_OLED.h"
-#include "Config.h"           // Arquivo com diversas definicoes do sketch
-
-void setup()
-{
-  Serial.begin(9600);            // Inicia comunicação Serial.
-  displayInit();                         // Inicializa displayOLED
-  display.drawString(0, 0, "testando");
-  display.display();
-  delay(1000);
-  connect_WIFI();
-  connect_MQTT();
-  setClock();                            // atualiza hora do sistema (para a autenticar o certificado e gerar o timestamp)
-  pinMode(SW_DISPLAY, INPUT);            
-  pinMode(CS_PIN,OUTPUT);                
-//  digitalWrite(CS_PIN, HIGH);            // habilita comunicação no ADE7753 - disabled by default
-  pinMode(LED_BUILTIN, OUTPUT);
-  pinMode(LEDPIN, OUTPUT);
-  SPI.begin();                           // Inicia comunicação SPI
-  configADE();                           // Configura registradores do ADE7753
-}
-
+const char* ssid = "Home";         // WiFi network name
+const char* wifi_password = "07111993"; // WiFi network password
+char* mqtt_server = "192.168.000.251";  // IP of the MQTT broker
+const char* mqtt_username = "energymeter"; // MQTT username
+const char* mqtt_password = "energymeter"; // MQTT password
+const char* mqtt_topic = "home/energymeter";
+char dev_id[5] = "0";
+char dev_abstract[30] = "Cristian's Bedroom";
+const char* clientID = "client_livingroom"; // MQTT client ID
+const char* ntp_primary = "pool.ntp.org";     // Servidores de fuso horário
+const char* ntp_secondary = "time.nist.gov";
 unsigned long last_upload_time = 0;         // Uso interno nos threads
-unsigned long last_debaunce_time = 0;              
+boolean offline_mode = false;
+int ind = 0;
+int upload_interval;
+char display_buffer;
 
-char msg_to_publish[1000];                 // Armazena a string a ser enviada para o broker
-unsigned long status_register = 0;         // Armazena o valor do registrador de status do ADE
-int display_current_view = 0;              // Armazena a informacao da tela apresentada no display
+WiFiClient wifiClient;
+PubSubClient client(mqtt_server, 1883, wifiClient); 
+SSD1306Wire display(0x3c, SDA_PIN, SCK_PIN);
+OLED OLED;
+ADE7753 ADE7753;
+ADE7753::Measurement buff[indices_size];
+ADE7753::Measurement* atual;
+Publisher Publisher;
+Serials Serials;
 
-void verificar_comando_serial(){
-   if (Serial.available()) {
-      char user_command[100] = "";
-      String arg1, arg2, arg3;
-      ler_serial(user_command);
-      
-      if (!strcmp(user_command, "regconfig")){
-         int i;
-         Serial.println("Aguardando comando...");
-         Serial.println("Ex. write16,0x01,0000111100001111");
-         while(!Serial.available()){}
-         ler_serial(user_command);     
-         arg1 = (getValue(user_command,',',0));
-         arg2 = (getValue(user_command,',',1));
-         arg3 = (getValue(user_command,',',2));
-         
-         char reg[20];
-         arg2.toCharArray(reg, sizeof(reg));
-         long int reg_int = strtol(reg, 0, 16);
-         char value[30];
-         arg3.toCharArray(value, sizeof(value));
-         long int value_int = strtol(value, 0, 2);
-                  
-         if (arg1 == "write16"){
-             write16(reg_int, value_int);
-         }
-         if (arg1 == "write8"){
-             write8(reg_int, value_int);
-         }
-         if (arg1 == "read24"){
-             Serial.print(registers[reg_int-1]);
-             Serial.print(" => ");
-             Serial.println(read24(reg_int),BIN);
-         }
-         if (arg1 == "read16"){
-             Serial.print(registers[reg_int-1]);
-             Serial.print(" => ");
-             Serial.println(read16(reg_int),BIN);
-         }
-         if (arg1 == "read8"){
-            Serial.print(registers[reg_int-1]);
-            Serial.print(" => ");
-            Serial.println(read8(reg_int),BIN);
-         }
-
-      }
-      if (!strcmp(user_command, "wificonfig")){
-         int i;
-         Serial.println("Aguardando comando...");
-         Serial.println("Ex. ip,192.168.0.1");
-         while(!Serial.available()){}
-         ler_serial(user_command);     
-         arg1 = (getValue(user_command,',',0));
-         arg2 = (getValue(user_command,',',1));
-         arg1.toCharArray(user_command, sizeof(user_command));
-         if (!strcmp(user_command, "ip")){
-            arg2.toCharArray(mqtt_server, sizeof(mqtt_server));
-         }        
-      }   
-   } 
+//cria rotinas que rodam a cada ciclo de tempo especifico 
+boolean threadTo(unsigned long* last_time, unsigned long default_time){ 
+   unsigned long now = millis();
+   if (now - *last_time > default_time) {
+      *last_time = now;
+      return true;
+   }  
+   else 
+      return false;  
 }
 
+unsigned long setClock() { 
+  configTime(0 * 3600, 0, "pool.ntp.org", "time.nist.gov");
+  Serial.println("Getting NTP time sync... ");
+  time_t now = time(nullptr);
+  return now;  
+}
+
+void piscaled(int quantidade, int tempo){
+  int i;
+  for (i=0; i<quantidade; i++){
+    digitalWrite(LED_EXTERNAL, LOW);
+    delay(tempo);
+    digitalWrite(LED_EXTERNAL, HIGH);
+    delay(tempo);
+  }
+}
         
+void setup(){
+  Serial.begin(9600);            // Inicia comunicação Serial.
+  WiFi.begin(ssid, wifi_password);
+  pinMode(SW_PIN, INPUT);            
+  pinMode(LED_EXTERNAL, OUTPUT);
+  ADE7753.Init(CSPIN);
+  OLED.Init(&display);
+  atual = &buff[0];
+}
+
 void loop() {
-    verificar_comando_serial();
-    
-    if (!digitalRead(SW_DISPLAY) && threadTo(&last_debaunce_time, debaunce_time)) {      
-        display_current_view++;       
-        displayUpdate(&display_current_view);                 // Muda tela do display
+    //verify internet connection
+    if ( (WiFi.status() != WL_CONNECTED) || !client.connect(clientID, mqtt_username, mqtt_password) ){
+        offline_mode = true; 
+        upload_interval = upload_interval_on;  
+    }
+    else{
+        offline_mode = false;
+        upload_interval - upload_interval_off;  
+    }
+   
+    //Serial Received Verify
+    if (Serial.available()){
+      Serials.ExecutaComandoSerial(&ADE7753);
     }
 
-    if (threadTo(&last_upload_time, time_between_uploads)) {         // Faz upload das informações mais recentes
-        piscaled(2, 50);
-        strcpy(atual.id, $id);
-        atual.tensao = retV();
-        atual.frequencia = retHz();
-        atual.corrente = retI();
-//        atual.FP = retFP();
-//        atual.pot_at = retW();
-//        atual.pot_re = retVAr();
-//        atual.pot_ap = retVA();
-        atual.timestamp = setClock();
-        displayUpdate(&display_current_view);
-        createMessage(msg_to_publish, atual);
-        publish_message(msg_to_publish);
+    atual->voltage = ADE7753.ReadVRMS()*598.5;  //fator reducao do trafo + divisores de tensao
+    atual->current = ADE7753.ReadIRMS()*20.09;  //fator reducao do sensor usado
+    atual->aparent_power = atual->current * atual->voltage;
+    atual->frequency = 1/(ADE7753.ReadPERIOD(3579545));
+    ADE7753.ReadFP(120, &atual->FP);
+    atual->active_power = atual->aparent_power * atual->FP;
+    atual->reactive_power = atual->aparent_power * sin(acos(atual->FP));
+    atual->active_energy = ADE7753.ReadActiveEnergy();
+    atual->apparent_energy = ADE7753.ReadApparentEnergy();
+    
+
+    //ADE7753.DisplayBufferUpdate((atual), (display_buffer), ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
+    //OLED.ShowCompleteView(&display, display_buffer);  //shows buffer content on display 
+
+    if ( ADE7753.CheckActiveEnergyHalfFull() || ADE7753.CheckAparentEnergyHalfFull() ){
+        ind++;
+        atual = &buff[ind];
     }
-//    resetastatus();
+
+    //Payload Upload
+    if (threadTo(&last_upload_time, upload_interval)) {         
+          Serial.println("indice:");
+          Serial.println(ind);
+          piscaled(1, 100);
+          atual->timestamp = setClock();
+          if (!offline_mode){
+              while (ind > 0){
+                  Publisher.PublishMessage(dev_id, dev_abstract, *atual, &client, mqtt_topic);
+                  ind--;
+                  atual = &buff[ind];
+              }
+              Publisher.PublishMessage(dev_id, dev_abstract, *atual, &client, mqtt_topic);
+          }
+          else 
+          {
+              if (ind<indices_size){
+                ind++;
+                atual = &buff[ind];
+              }
+          }
+      }
 }
