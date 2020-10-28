@@ -19,8 +19,10 @@
 #define LED_EXTERNAL D3  
 #define SW_PIN D4  // Display change views
 #define CSPIN D8  // ADE7753 SPI Enable Pin
-#define time_between_uploads 7000 //ms                        // Tempo entre uploads
+#define upload_interval_on 10000 //ms                        // Tempo entre uploads
+#define upload_interval_off 300000 //ms                        // Tempo entre uploads
 #define debaunce_time 250                                      // Debaunce da chave do display
+#define indices_size 250
 #define serial_speed 115200        // Serial port speed
 
 const char* ssid = "Home";         // WiFi network name
@@ -37,6 +39,7 @@ const char* ntp_secondary = "time.nist.gov";
 unsigned long last_upload_time = 0;         // Uso interno nos threads
 boolean offline_mode = false;
 int ind = 0;
+int upload_interval;
 char display_buffer;
 
 WiFiClient wifiClient;
@@ -44,7 +47,7 @@ PubSubClient client(mqtt_server, 1883, wifiClient);
 SSD1306Wire display(0x3c, SDA_PIN, SCK_PIN);
 OLED OLED;
 ADE7753 ADE7753;
-ADE7753::Measurement buff[200];
+ADE7753::Measurement buff[indices_size];
 ADE7753::Measurement* atual;
 Publisher Publisher;
 Serials Serials;
@@ -90,10 +93,12 @@ void setup(){
 void loop() {
     //verify internet connection
     if ( (WiFi.status() != WL_CONNECTED) || !client.connect(clientID, mqtt_username, mqtt_password) ){
-        offline_mode = true;  
+        offline_mode = true; 
+        upload_interval = upload_interval_on;  
     }
     else{
-        offline_mode = false;  
+        offline_mode = false;
+        upload_interval - upload_interval_off;  
     }
    
     //Serial Received Verify
@@ -105,15 +110,23 @@ void loop() {
     atual->current = ADE7753.ReadIRMS()*20.09;  //fator reducao do sensor usado
     atual->aparent_power = atual->current * atual->voltage;
     atual->frequency = 1/(ADE7753.ReadPERIOD(3579545));
-    ADE7753.ReadEnergy(120, &atual->FP);
+    ADE7753.ReadFP(120, &atual->FP);
     atual->active_power = atual->aparent_power * atual->FP;
     atual->reactive_power = atual->aparent_power * sin(acos(atual->FP));
+    atual->active_energy = ADE7753.ReadActiveEnergy();
+    atual->apparent_energy = ADE7753.ReadApparentEnergy();
+    
 
     //ADE7753.DisplayBufferUpdate((atual), (display_buffer), ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
     //OLED.ShowCompleteView(&display, display_buffer);  //shows buffer content on display 
 
-   //Payload Upload
-    if (threadTo(&last_upload_time, time_between_uploads)) {         
+    if ( ADE7753.CheckActiveEnergyHalfFull() || ADE7753.CheckAparentEnergyHalfFull() ){
+        ind++;
+        atual = &buff[ind];
+    }
+
+    //Payload Upload
+    if (threadTo(&last_upload_time, upload_interval)) {         
           Serial.println("indice:");
           Serial.println(ind);
           piscaled(1, 100);
@@ -128,8 +141,10 @@ void loop() {
           }
           else 
           {
-              ind++;
-              atual = &buff[ind];
+              if (ind<indices_size){
+                ind++;
+                atual = &buff[ind];
+              }
           }
       }
 }

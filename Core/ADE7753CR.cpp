@@ -381,7 +381,19 @@ float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
     return period;
 }
 
-void ADE7753::ReadEnergy(int half_line_cycles, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
+float ADE7753::ReadActiveEnergy(){
+    long active_value = Signed24toSigned32( Read24(RAENERGY_S) );
+    active_value *=(0.827/12.1031); //energy scales // W conversion
+    return active_value;
+}
+
+float ADE7753::ReadApparentEnergy(){
+    long apparent_value = Signed24toSigned32( Read24(RVAENERGY_U) );
+    apparent_value /= 12.1031; //VA conversion
+    return apparent_value;
+}
+
+void ADE7753::ReadFP(int half_line_cycles, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
     long active_value, reactive_value;
     long apparent_value;
     SetLINECYC(half_line_cycles);
@@ -392,17 +404,9 @@ void ADE7753::ReadEnergy(int half_line_cycles, float* power_factor){ //return ac
         delayMicroseconds(5);
     }
 
-    active_value = Read24(LAENERGY_S);      
+    active_value = Signed24toSigned32( Read24(LAENERGY_S) );      
     apparent_value = Read24(LVAENERGY_U);
-    reactive_value = Read24(LVARENERGY_S);    
-    
-    // 2s complement conversion
-    if (active_value & 1 << 23) {   
-      active_value = ((~active_value) & 0xffffff);
-    }
-    if (reactive_value & 1 << 23) {
-      reactive_value = ((~reactive_value) & 0xffffff);
-    }
+    reactive_value = Signed24toSigned32( Read24(LVARENERGY_S) );    
     
     active_value *=(0.827/12.1031); //energy scales // W conversion
     apparent_value /= 12.1031; //VA conversion
@@ -544,6 +548,13 @@ int ADE7753::WaitZeroCross(){  //returns 0 when ZeroCross
             delay(100);
             break;
         }    
+    }
+    return value;
+}
+
+long ADE7753::Signed24toSigned32(long value){
+    if (value & 1 << 23) {   
+      value = -((~value) & 0xffffff);
     }
     return value;
 }
