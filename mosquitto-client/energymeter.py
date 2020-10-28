@@ -19,15 +19,16 @@ def on_message(client, userdata, msg):
     mensagem_b = str(msg.payload.decode("utf-8","ignore"))
     j_data = json.loads(mensagem_b)
     print(j_data)
+    print("\n")
 
     cnx = mysql.connector.connect(user='admin', password='password',
                               host='localhost',
                               database='energymeter')
     cursor=cnx.cursor()
 
-    add_data = "INSERT INTO data (id, timestamp, tensao, corrente, FP, pot_at, pot_re, pot_ap, freq) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s)"
-    data = (j_data['id'], j_data['timestamp'], j_data['tensao'], j_data['corrente'], j_data['FP'], j_data['pot_at'], j_data['pot_re'], j_data['pot_ap'], j_data['frequencia'] )
-    print(data)
+    add_data = "INSERT INTO data (id, timestamp, tensao, corrente, FP, pot_at, pot_re, pot_ap, freq, active_energy, apparent_energy) VALUES(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+    data = (j_data['id'], j_data['timestamp'], j_data['tensao'], j_data['corrente'], j_data['FP'], j_data['pot_at'], j_data['pot_re'], j_data['pot_ap'], j_data['frequencia'], j_data['active_energy'], j_data['apparent_energy'] )
+   # print(data)
 
     cursor.execute(add_data, data)
     cnx.commit()
