@@ -29,8 +29,8 @@ char* mqtt_server = "192.168.000.251";  // IP of the MQTT broker
 const char* mqtt_username = "energymeter"; // MQTT username
 const char* mqtt_password = "energymeter"; // MQTT password
 const char* mqtt_topic = "home/energymeter";
-char* dev_id = "0";
-char* dev_abstract = "Cristian's Bedroom";
+char dev_id[5] = "0";
+char dev_abstract[30] = "Cristian's Bedroom";
 const char* clientID = "client_livingroom"; // MQTT client ID
 const char* ntp_primary = "pool.ntp.org";     // Servidores de fuso horário
 const char* ntp_secondary = "time.nist.gov";
@@ -109,26 +109,27 @@ void loop() {
     atual->active_power = atual->aparent_power * atual->FP;
     atual->reactive_power = atual->aparent_power * sin(acos(atual->FP));
 
-    ADE7753.DisplayBufferUpdate((atual), (&display_buffer), ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
-    OLED.ShowCompleteView(&display, &display_buffer);  //shows buffer content on display 
+    //ADE7753.DisplayBufferUpdate((atual), (display_buffer), ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
+    //OLED.ShowCompleteView(&display, display_buffer);  //shows buffer content on display 
 
    //Payload Upload
-      if (threadTo(&last_upload_time, time_between_uploads)) {         
-            Serial.println(ind);
-            piscaled(1, 100);
-            atual->timestamp = setClock();
-            if (!offline_mode){
-                while (ind > 0){
-                    Publisher.PublishMessage(dev_id, dev_abstract, *atual, &client, mqtt_topic);
-                    ind--;
-                    atual = &buff[ind];
-                }
-                Publisher.PublishMessage(dev_id, dev_abstract, *atual, &client, mqtt_topic);
-            }
-            else 
-            {
-                ind++;
-                atual = &buff[ind];
-            }
+    if (threadTo(&last_upload_time, time_between_uploads)) {         
+          Serial.println("indice:");
+          Serial.println(ind);
+          piscaled(1, 100);
+          atual->timestamp = setClock();
+          if (!offline_mode){
+              while (ind > 0){
+                  Publisher.PublishMessage(dev_id, dev_abstract, *atual, &client, mqtt_topic);
+                  ind--;
+                  atual = &buff[ind];
+              }
+              Publisher.PublishMessage(dev_id, dev_abstract, *atual, &client, mqtt_topic);
+          }
+          else 
+          {
+              ind++;
+              atual = &buff[ind];
+          }
       }
 }

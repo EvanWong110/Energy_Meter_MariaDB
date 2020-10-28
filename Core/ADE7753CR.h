@@ -388,7 +388,7 @@
       float ReadIRMS();
       float ReadPERIOD(int CLKIN);
       void ReadEnergy(int half_line_cycles, float* power_factor);
-      void DisplayBufferUpdate(Measurement* data, char* dest, int view = 1, bool next = 0);
+      void DisplayBufferUpdate(Measurement* data, char dest, int view = 1, bool next = 0);
       int GetDisplayPosition();
       
     private:

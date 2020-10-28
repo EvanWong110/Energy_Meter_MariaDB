@@ -29,6 +29,7 @@ void Publisher::CreateMessage(char* dev_id, char* dev_abstract, ADE7753::Measure
     soma_ponteiros += ponteiro;
     ponteiro = snprintf(buff+soma_ponteiros, 50, "}");
     strcpy(msg_to_publish, buff);
+    Serial.println(msg_to_publish);
 }
 
 void Publisher::PublishMessage(char* dev_id, char* dev_abstract, ADE7753::Measurement atual, PubSubClient* pubsubclient, const char* mqtt_topic){   

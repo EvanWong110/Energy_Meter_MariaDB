@@ -412,35 +412,35 @@ void ADE7753::ReadEnergy(int half_line_cycles, float* power_factor){ //return ac
     if (*power_factor >= 1) *power_factor = 0.9999999999;
 }
 
-void ADE7753::DisplayBufferUpdate(Measurement* data, char* dest, int view, boolean next)  
+void ADE7753::DisplayBufferUpdate(Measurement* data, char dest, int view, boolean next)  
 {
     switch (view){
       case 1:
-          sprintf(dest, "Voltage=%.1f", data->voltage);
+          sprintf(&dest, "Voltage=%.1f", data->voltage);
           display_position+=next;
           break;
       case 2:
-          sprintf(dest, "Current=%.2f", data->current);
+          sprintf(&dest, "Current=%.2f", data->current);
           display_position+=next;
           break;
       case 3:
-          sprintf(dest, "FP=%.2f", data->FP);
+          sprintf(&dest, "FP=%.2f", data->FP);
           display_position+=next;
           break;
       case 4:
-          sprintf(dest, "Frequency=%.2f", data->frequency);
+          sprintf(&dest, "Frequency=%.2f", data->frequency);
           display_position+=next;
           break;
       case 5:
-          sprintf(dest, "Apparent Potency=%.0f", data->aparent_power);
+          sprintf(&dest, "Apparent Potency=%.0f", data->aparent_power);
           display_position+=next;
           break;
       case 6:
-          sprintf(dest, "Active Potency=%.0f", data->active_power);
+          sprintf(&dest, "Active Potency=%.0f", data->active_power);
           display_position+=next;
           break;
       case 7:
-          sprintf(dest, "Reactive Potency=%.0f", data->reactive_power);
+          sprintf(&dest, "Reactive Potency=%.0f", data->reactive_power);
           if (next) display_position = 1;
           break;
       default:
