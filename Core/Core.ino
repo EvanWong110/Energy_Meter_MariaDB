@@ -29,14 +29,15 @@ char* mqtt_server = "192.168.000.251";  // IP of the MQTT broker
 const char* mqtt_username = "energymeter"; // MQTT username
 const char* mqtt_password = "energymeter"; // MQTT password
 const char* mqtt_topic = "home/energymeter";
-const char* dev_id = "0";
-const char* dev_abstract = "Cristian's Bedroom";
+char* dev_id = "0";
+char* dev_abstract = "Cristian's Bedroom";
 const char* clientID = "client_livingroom"; // MQTT client ID
 const char* ntp_primary = "pool.ntp.org";     // Servidores de fuso horário
 const char* ntp_secondary = "time.nist.gov";
 unsigned long last_upload_time = 0;         // Uso interno nos threads
 boolean offline_mode = false;
 int ind = 0;
+char display_buffer;
 
 WiFiClient wifiClient;
 PubSubClient client(mqtt_server, 1883, wifiClient); 
@@ -100,8 +101,6 @@ void loop() {
       Serials.ExecutaComandoSerial(&ADE7753);
     }
 
-    strcpy(atual->dev_id, dev_id);
-    strcpy(atual->dev_abstract, dev_abstract);
     atual->voltage = ADE7753.ReadVRMS()*598.5;  //fator reducao do trafo + divisores de tensao
     atual->current = ADE7753.ReadIRMS()*20.09;  //fator reducao do sensor usado
     atual->aparent_power = atual->current * atual->voltage;
@@ -110,8 +109,8 @@ void loop() {
     atual->active_power = atual->aparent_power * atual->FP;
     atual->reactive_power = atual->aparent_power * sin(acos(atual->FP));
 
-    ADE7753.DisplayBufferUpdate(atual, ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
-    OLED.ShowCompleteView(&display, atual->display_buffer);  //shows buffer content on display 
+    ADE7753.DisplayBufferUpdate((atual), (&display_buffer), ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
+    OLED.ShowCompleteView(&display, &display_buffer);  //shows buffer content on display 
 
    //Payload Upload
       if (threadTo(&last_upload_time, time_between_uploads)) {         
@@ -120,11 +119,11 @@ void loop() {
             atual->timestamp = setClock();
             if (!offline_mode){
                 while (ind > 0){
-                    Publisher.PublishMessage(*atual, &client, mqtt_topic);
+                    Publisher.PublishMessage(dev_id, dev_abstract, *atual, &client, mqtt_topic);
                     ind--;
                     atual = &buff[ind];
                 }
-                Publisher.PublishMessage(*atual, &client, mqtt_topic);
+                Publisher.PublishMessage(dev_id, dev_abstract, *atual, &client, mqtt_topic);
             }
             else 
             {

@@ -1,15 +1,15 @@
 
 #include "PUBLISHERCR.h"
 
-void Publisher::CreateMessage(ADE7753::Measurement data) {
+void Publisher::CreateMessage(char* dev_id, char* dev_abstract, ADE7753::Measurement data) {
     char buff[1000] = "";
     int ponteiro;
     int soma_ponteiros = 0;
     ponteiro = snprintf(buff, 50, "{\n");
     soma_ponteiros += ponteiro;
-    ponteiro = snprintf(buff+soma_ponteiros, 50, "\"id\" : \"%s\",\n", data.dev_id);
+    ponteiro = snprintf(buff+soma_ponteiros, 50, "\"id\" : \"%s\",\n", dev_id);
     soma_ponteiros += ponteiro;
-    ponteiro = snprintf(buff+soma_ponteiros, 50, "\"abstract\" : \"%s\",\n", data.dev_abstract);
+    ponteiro = snprintf(buff+soma_ponteiros, 50, "\"abstract\" : \"%s\",\n", dev_abstract);
     soma_ponteiros += ponteiro;
     ponteiro = snprintf(buff+soma_ponteiros, 50, "\"timestamp\" : \"%d\",\n", data.timestamp);
     soma_ponteiros += ponteiro;
@@ -31,8 +31,8 @@ void Publisher::CreateMessage(ADE7753::Measurement data) {
     strcpy(msg_to_publish, buff);
 }
 
-void Publisher::PublishMessage(ADE7753::Measurement atual, PubSubClient* pubsubclient, const char* mqtt_topic){   
-    CreateMessage(atual);
+void Publisher::PublishMessage(char* dev_id, char* dev_abstract, ADE7753::Measurement atual, PubSubClient* pubsubclient, const char* mqtt_topic){   
+    CreateMessage(dev_id, dev_abstract, atual);
     Serial.print("Publishing message...");
     pubsubclient->beginPublish(mqtt_topic, String(msg_to_publish).length(), false);
     pubsubclient->print(msg_to_publish);

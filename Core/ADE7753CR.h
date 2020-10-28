@@ -284,9 +284,6 @@
   {
     public:
       typedef struct {
-        char dev_id[5] = "0";
-        char dev_abstract[30] = "device descriptor";
-        char display_buffer[30];
         float voltage = 0;
         float current = 0;
         float frequency = 0;
@@ -391,7 +388,7 @@
       float ReadIRMS();
       float ReadPERIOD(int CLKIN);
       void ReadEnergy(int half_line_cycles, float* power_factor);
-      void DisplayBufferUpdate(Measurement* data, int view = 1, boolean next = 0);
+      void DisplayBufferUpdate(Measurement* data, char* dest, int view = 1, bool next = 0);
       int GetDisplayPosition();
       
     private:
