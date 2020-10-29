@@ -1,7 +1,7 @@
 import paho.mqtt.client as mqtt
 import json
 
-MQTT_ADDRESS = 'localhost'
+MQTT_ADDRESS = '192.168.0.251'
 MQTT_USER = 'energymeter'
 MQTT_PASSWORD = 'energymeter'
 MQTT_TOPIC = 'home/energymeter'

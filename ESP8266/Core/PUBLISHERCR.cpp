@@ -25,9 +25,9 @@ void Publisher::CreateMessage(char* dev_id, char* dev_abstract, ADE7753::Measure
     soma_ponteiros += ponteiro;
     ponteiro = snprintf(buff+soma_ponteiros, 50, "\"pot_ap\" : \"%f\",\n", data.aparent_power);
     soma_ponteiros += ponteiro;
-    ponteiro = snprintf(buff+soma_ponteiros, 50, "\"FP\" : \"%f\"\n", data.FP);
+    ponteiro = snprintf(buff+soma_ponteiros, 50, "\"FP\" : \"%f\",\n", data.FP);
     soma_ponteiros += ponteiro;
-    ponteiro = snprintf(buff+soma_ponteiros, 50, "\"active_energy\" : \"%f\"\n", data.active_energy);
+    ponteiro = snprintf(buff+soma_ponteiros, 50, "\"active_energy\" : \"%f\",\n", data.active_energy);
     soma_ponteiros += ponteiro;
     ponteiro = snprintf(buff+soma_ponteiros, 50, "\"apparent_energy\" : \"%f\"\n", data.apparent_energy);
     soma_ponteiros += ponteiro;
