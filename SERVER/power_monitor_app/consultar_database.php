@@ -6,50 +6,21 @@
     if(isset($_GET['begin_time']) && isset($_GET['end_time'])){      //exige preenchimento dos inputs de pesquisa
         $time1 = (string) strtotime($_GET['begin_time']);            //selecao de itens pesquisados UnixTIMESTAMP
         $time2 = (string) strtotime($_GET['end_time']);
-        $tamanho = (int) $time2 - (int) $time1;
-        if ($tamanho < 3600){
-            $indice_busca = 1;  // para até uma hora a cada 30 segundos
+        $tamanho = (int) $time2 - (int) $time1;            
+
+        $hostname = "192.168.0.251";
+        $username = "admin";
+        $password = "password";
+        $db = "energymeter";
+
+        $dbconnect=mysqli_connect($hostname,$username,$password,$db);
+
+        if ($dbconnect->connect_error) {
+            die("Database connection failed: " . $dbconnect->connect_error);
         }
-        else if ($tamanho >= 3600 && $tamanho < 7200){
-            $indice_busca = 2;   // cada 5 minutos
-        }
-        else if ($tamanho >= 7200 && $tamanho <14400 ){
-            $indice_busca = 3;  //cada 15 minutos
-        }
-        else {
-            $indice_busca = 4;  //cada duas horas
-        }
-        
-        if ($tamanho > 2592000){
-            ?><script type="text/javascript">
-            alert("O período máximo para consulta é de um mês.");
-            </script><?php
-        } else 
-        {
-              
-
-
-                $hostname = "192.168.0.251";
-                $username = "admin";
-                $password = "password";
-                $db = "energymeter";
-
-                $dbconnect=mysqli_connect($hostname,$username,$password,$db);
-
-                if ($dbconnect->connect_error) {
-                  die("Database connection failed: " . $dbconnect->connect_error);
-                }
-                $comando = "SELECT * FROM data WHERE timestamp BETWEEN $time1 AND $time2";
-                $query = mysqli_query($dbconnect, $comando)
-                   or die (mysqli_error($dbconnect));
-
-                #while ($row = mysqli_fetch_array($query)) {
-                #   echo '<pre>'; print($row['timecode']); echo '</pre>';
-
-                #}
-
-           
-        }
+            $comando = "SELECT * FROM data WHERE timestamp BETWEEN $time1 AND $time2";
+            $query = mysqli_query($dbconnect, $comando)
+            or die (mysqli_error($dbconnect));                  
     }
       	$data=array();
     if(isset($tamanho)){    
@@ -62,12 +33,17 @@
                 (float) $row['pot_ap'],
                 (float) $row['pot_at'],
                 (float) $row['freq'],
-                (float) $row['FP']           
+                (float) $row['FP']
+            );
+            $data2[]=array(
+                (float) $row['apparent_energy'],
+                (float) $row['active_energy']           
             );
         }
     }
-   #     echo '<pre>'; print_r($data); echo '</pre>';
-?>
+#    echo '<pre>'; print_r($data); echo '</pre>';
+#    echo '<pre>'; print_r($data2); echo '</pre>';
+    ?>
 
 <html>
   <head>
@@ -108,9 +84,6 @@
                 curveType: 'function',
                 legend: { position: 'right' },
                 logScale: true   //escala logaritmica permite a melhor visualização de todos os valores no mesmo grafico
-            
-
-
             };
 
             colunas_ativas = [{
@@ -265,32 +238,28 @@ text-decoration:none;
 
     <div style="float: right; width: 18%"  align="center">
         <br>
-        <h6>Valores médios no período selecionado:<br></h6>
+        <h6>Consumo no período selecionado:<br></h6>
         <?php
-            if (isset($data[0])){      //calcula as médias dos valores pesquisados 
-                $somatorio = [0, 0, 0, 0, 0, 0, 0, 0];
-                $unidade=array('', 'V', 'A', 'VAr', 'VA', 'W', 'Hz', '');
-                $descricao=array('', 'Tensão: ', 'Corrente: ', 'Pot. Reativa: ', 'Pot. Aparente: ', 'Pot. Ativa: ', 'Frequência: ', 'Fator de potência: ');
-                $media = array();
-                $qtd_data = count($data);
-                $qtd_variaveis = count($data[0]);
-                foreach($data as $indx => $registro){
-                    foreach ($registro as $indx2 => $parametro) {
-                    $somatorio[$indx2] += $parametro;                       
-                    }
+            if (isset($data2[0])){      //calcula as médias dos valores pesquisados 
+                $somatorio = [0, 0];
+                $qtd_data = count($data2);
+                foreach($data2 as $indice => $valor){
+                    $somatorio[0] = $somatorio[0] + $data2[$indice][0];
+                    $somatorio[1] = $somatorio[1] + $data2[$indice][1];
                 }
-                foreach($somatorio as $indx3 => $valor){
-                    if ($indx3 == 0) continue;
-                    $media[$indx3] = $valor / ($qtd_data);
-                    echo "$descricao[$indx3] $media[$indx3] $unidade[$indx3]<br>";
-                }
+                $intervalo_entre_uploads = $data[1][0]-$data[0][0];
+                $somatorio[0] = $somatorio[0]/(3600*1000);
+                $somatorio[1] = $somatorio[1]/(3600*1000);
+                echo "$somatorio[0] kVAh <br>";
+                echo "$somatorio[1] kWh <br>";
+                
             }
-            ?>
+        ?>
         <h6><br><br>Estimativa conforme informações deste período: <br></h6>
         <?php
         if (isset($data[0])){      //calcula as médias dos valores pesquisados
-            $consumo_mensal = ($media[5]*720)/1000;
-            echo ("Consumo mensal: ".number_format($consumo_mensal,0)." kWh") ;
+           # $consumo_mensal = ($media[5]*720)/1000;
+           # echo ("Consumo mensal: ".number_format($consumo_mensal,0)." kWh") ;
         }
         ?>
         

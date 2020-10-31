@@ -382,16 +382,29 @@ float ADE7753::ReadPERIOD(int CLKIN){  //returns period in seconds
 }
 
 float ADE7753::ReadActiveEnergy(){
-    long active_value = Signed24toSigned32( Read24(RAENERGY_S) );
+    long active_value = Signed24toSigned32( Read24(AENERGY_S) );
     active_value *=(0.827/12.1031); //energy scales // W conversion
     return active_value;
 }
 
 float ADE7753::ReadApparentEnergy(){
+    long apparent_value = Signed24toSigned32( Read24(VAENERGY_U) );
+    apparent_value /= 12.1031; //VA conversion
+    return apparent_value;
+}
+
+float ADE7753::ReadandResetApparentEnergy(){
+    long apparent_value = Signed24toSigned32( Read24(RAENERGY_U) );
+    apparent_value /= 12.1031; //VA conversion
+    return apparent_value;
+}
+
+float ADE7753::ReadandResetApparentEnergy(){
     long apparent_value = Signed24toSigned32( Read24(RVAENERGY_U) );
     apparent_value /= 12.1031; //VA conversion
     return apparent_value;
 }
+
 
 void ADE7753::ReadFP(int half_line_cycles, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
     long active_value, reactive_value;
