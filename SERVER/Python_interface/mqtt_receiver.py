@@ -1,43 +1,56 @@
 import paho.mqtt.client as mqtt
 import parse_config as parse
+import json
 
 configuration = parse.ConfPacket()
-configs = configuration.load_config()    
+configs = configuration.load_config('MQTT, MQTT_TOPICS')
 
 def on_connect(client, userdata, flags, rc):
     """ The callback for when the client receives a CONNACK response from the server."""
     print('Connected with result code ' + str(rc))
-    for topic_address in configs['MQTT']['TOPICS']:
-        topic = configs['MQTT']['TOPICS'][topic_address]
-        client.subscribe(topic)
+    for topic in configs['MQTT_TOPICS']:
+        client.subscribe(configs['MQTT_TOPICS'][topic])
 
-class MQTTConn:
-    def __init__(self, on_message):
-        #self.variable = value
-        self.on_message = on_message
-        pass
-
-    def create_connections(self):
-        #print(configs)
-        client = mqtt.Client()
-        host = configs['MQTT']['HOST_ADDRESS']
-        user = configs['MQTT']['USER']
-        passwd = configs['MQTT']['PASSWORD']
-        client.username_pw_set(user, passwd)
-        client.on_connect = on_connect
-        client.on_message = self.on_message
-        client.connect(host, 1883)
-        client.loop_forever()
-    
-def on_message_f(client, userdata, msg):
+def on_message(client, userdata, msg):
     """The callback for when a PUBLISH message is received from the server."""
     #print(msg.topic + ' ' + str(msg.payload))
-    mensagem_b = str(msg.payload.decode("utf-8","ignore"))
-    print(mensagem_b)
+    msg_decoded = str(msg.payload.decode("utf-8","ignore"))
+    print("Msg decoded: ", msg_decoded)
+    try:
+        msg_dict = json.loads(msg_decoded)
+        msg_dict['topic'] = msg.topic
+        print("Dict: ", msg_dict)
+    except Exception as error:
+        print("Ocorreu um erro na decodificação da mensagem JSON: ", error)
 
+class MQTTReceiver:
+    def __init__(self):
+        pass     
+
+    def on_received(self, func):
+        func()
+        
+    def create_connections(self):
+        client = mqtt.Client()
+        print("funcao: ",self.teste)
+        self.teste()
+        host = configs['MQTT']['host_address']
+        user = configs['MQTT']['user']
+        passwd = configs['MQTT']['password']
+        client.username_pw_set(user, passwd)
+        client.on_connect = on_connect
+        client.on_message = on_message
+        client.connect(host, 1883)
+        client.loop_forever()
+        #loops at here
+   
+def testando():
+    print("teste")
 
 def main():
-    Received = MQTTConn(on_message_f)
+    print(configs)    
+    Received = MQTTReceiver()
+    Received.teste = testando
     Received.create_connections()
 
 if __name__ == '__main__':
