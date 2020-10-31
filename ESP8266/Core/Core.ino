@@ -121,7 +121,7 @@ void loop() {
         atual->active_energy = ADE7753.ReadandResetActiveEnergy();
         atual->apparent_energy = ADE7753.ReadandResetApparentEnergy();
         atual = &buff[ind];
-        Serial.println("half then full")
+        Serial.println("half then full");
     }
 
     //Payload Upload

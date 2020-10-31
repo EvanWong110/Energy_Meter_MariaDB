@@ -391,7 +391,7 @@
       float ReadApparentEnergy();
       float ReadReactiveEnergy();
       float ReadandResetApparentEnergy();
-      float ReadandResetReactiveEnergy();
+      float ReadandResetActiveEnergy();
       void ReadFP(int half_line_cycles, float* power_factor);
       void DisplayBufferUpdate(Measurement* data, char dest, int view = 1, bool next = 0);
       int GetDisplayPosition();

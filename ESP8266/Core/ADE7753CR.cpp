@@ -393,10 +393,10 @@ float ADE7753::ReadApparentEnergy(){
     return apparent_value;
 }
 
-float ADE7753::ReadandResetApparentEnergy(){
-    long apparent_value = Signed24toSigned32( Read24(RAENERGY_U) );
-    apparent_value /= 12.1031; //VA conversion
-    return apparent_value;
+float ADE7753::ReadandResetActiveEnergy(){
+    long active_value = Signed24toSigned32( Read24(RAENERGY_S) );
+    active_value *= (0.827/12.1031); //VA conversion
+    return active_value;
 }
 
 float ADE7753::ReadandResetApparentEnergy(){
