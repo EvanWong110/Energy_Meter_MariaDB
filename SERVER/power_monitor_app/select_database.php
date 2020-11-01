@@ -1,3 +1,6 @@
+<?php
+require "validador_acesso.php";   //protege o acesso a pagina para usuarios logados
+?>
 <html>
   <head>
     <meta charset="utf-8" />
@@ -13,13 +16,18 @@
   </head>
   <body>
 
+
+  
 <?php
-        $hostname = "192.168.0.251";
-        $username = "admin";
-        $password = "password";
-        $db = "energymeter";
+        $ini_array = parse_ini_file('config.ini', true);
+        $ini_array = $ini_array['MARIADB_DATABASE'];
+     #   print_r($ini_array);
+        $hostname = $ini_array['HOST'];
+        $username = $ini_array['USER'];
+        $password = $ini_array['PASSWORD'];
         $databases = array();
-        $dbconnect=mysqli_connect($hostname,$username,$password,$db);
+        
+        $dbconnect=mysqli_connect($hostname,$username,$password,'information_schema');
 
         if ($dbconnect->connect_error) {
             die("Database connection failed: " . $dbconnect->connect_error);
@@ -30,16 +38,18 @@
 
         while ($row = mysqli_fetch_array($query)) {
             array_push($databases, $row[0]);
-     #       print($row[0]);
         }
 ?>
-
 
     <nav class="navbar navbar-dark bg-dark">
         <a class="navbar-brand" href="#">
           <img src="logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
           Power Monitor App
         </a>
+        <ul class="navbar-nav">
+        <li class="nav-item">
+          <a class="nav-link" href="logoff.php">SAIR</a>  <!--Executa logoff da página -->
+      </ul>
       </nav>
       <div class="container">    
         <div class="row">
@@ -60,7 +70,7 @@
                       </select>
                       <br/>              
                       <br/>              
-                    <button class="btn btn-lg btn-info btn-block" type="submit">Entrar</button>
+                    <button class="btn btn-lg btn-info btn-block" type="submit">Selecionar</button>
                   </form>
               </div>
             </div>

@@ -14,7 +14,7 @@
 	if ($usuario_autenticado) {
 		echo 'Usuario autenticado';
 		$_SESSION['autenticado'] = 'SIM';
-		header('Location: consultar_database.php');
+		header('Location: select_database.php');
 	} else {
 		$_SESSION['autenticado'] = 'NAO';
 		header('Location: index.php?erro_login=erro_autenticacao');
