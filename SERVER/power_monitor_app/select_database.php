@@ -19,16 +19,15 @@ require "validador_acesso.php";   //protege o acesso a pagina para usuarios loga
 
   
 <?php
-        $ini_array = parse_ini_file('config.ini', true);
-        $ini_array = $ini_array['MARIADB_DATABASE'];
-     #   print_r($ini_array);
+        $ini_array_full = parse_ini_file($_SERVER['DOCUMENT_ROOT'].'/config.ini', true);
+        $ini_array = $ini_array_full['MARIADB_DATABASE'];
+        $_SESSION['ini_array'] = $ini_array;       
         $hostname = $ini_array['HOST'];
         $username = $ini_array['USER'];
         $password = $ini_array['PASSWORD'];
-        $databases = array();
-        
         $dbconnect=mysqli_connect($hostname,$username,$password,'information_schema');
-
+        $databases = array();
+ 
         if ($dbconnect->connect_error) {
             die("Database connection failed: " . $dbconnect->connect_error);
         }
@@ -61,7 +60,7 @@ require "validador_acesso.php";   //protege o acesso a pagina para usuarios loga
               <div class="card-body">
                 <form action="tipo_de_consulta.php" method="post">
                     <label for="database">Database:</label>
-                    <select id="database" name="Selecione">
+                    <select id="database" name="database">
                       <?php foreach($databases as $database)
                       {
                         print "<option value=$database>$database</option>";

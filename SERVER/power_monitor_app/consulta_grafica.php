@@ -1,20 +1,19 @@
 <?php
     require "validador_acesso.php";   //protege o acesso a pagina para usuarios logados
     date_default_timezone_set('America/Sao_Paulo');      //configura a timezone
-
-print_r($_SESSION);
+    print_r($_SESSION);
     if(isset($_SESSION['begin_time']) && isset($_SESSION['end_time'])){      //exige preenchimento dos inputs de pesquisa
         $time1 = (string) strtotime($_SESSION['begin_time']);            //selecao de itens pesquisados UnixTIMESTAMP
         $time2 = (string) strtotime($_SESSION['end_time']);
         $tamanho = (int) $time2 - (int) $time1;            
 
-        $hostname = "192.168.0.251";
-        $username = "admin";
-        $password = "password";
-        $db = "energymeter";
+        $hostname = $_SESSION['ini_array']['HOST'];
+        $username = $_SESSION['ini_array']['USER'];
+        $password = $_SESSION['ini_array']['PASSWORD'];
+        $database = $_SESSION['database'];
 
-        $dbconnect=mysqli_connect($hostname,$username,$password,$db);
-
+        $dbconnect=mysqli_connect($hostname,$username,$password, $database);
+ 
         if ($dbconnect->connect_error) {
             die("Database connection failed: " . $dbconnect->connect_error);
         }
@@ -148,11 +147,11 @@ print_r($_SESSION);
                 altera_colunas(7);
             }
 
-            var resetar = document.getElementById("btReset");  //habilita a visualizacao de todas as colunas
-            resetar.onclick = function() {
+            var mostra_todos = document.getElementById("btReset").onclick = function() {
                 view = new google.visualization.DataView(data);
                 colunas_ativas = [0, 1, 2, 3, 4, 5, 6, 7];
                 view.setColumns(colunas_ativas);
+                chart.draw(view, options);
             }
         }
     </script>
@@ -174,16 +173,21 @@ text-decoration:none;
 </style>
 
   <body>
-    <nav class="navbar navbar-dark bg-dark">
-      <a class="navbar-brand" href="#">
-        <img src="logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
-        Power Monitor App  <!--Titulo ao lado da imagem -->
-      </a>
-      <ul class="navbar-nav">
+  <nav class="navbar navbar-dark bg-dark">
+        <a class="navbar-brand" href="#">
+          <img src="logo.png" width="30" height="30" class="d-inline-block align-top" alt="">
+          Power Monitor App
+        </a>
+       
+        <ul class="nav">
         <li class="nav-item">
-          <a class="nav-link" href="logoff.php">SAIR</a>  <!--Executa logoff da página -->
-      </ul>
-    </nav>
+            <a class="nav-link" href="select_database.php">VOLTAR</a>  <!--Executa logoff da página -->
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="logoff.php">SAIR</a>  <!--Executa logoff da página -->
+        </li>
+        </ul>
+  </nav>
 
     <div style="float: right; width: 18%"  align="center">
         <br>

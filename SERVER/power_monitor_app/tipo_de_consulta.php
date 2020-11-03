@@ -1,6 +1,14 @@
 <?php
 require "validador_acesso.php";   //protege o acesso a pagina para usuarios logados
 date_default_timezone_set('America/Fortaleza');      //configura a timezone
+print_r($_SESSION);
+$hostname = $_SESSION['ini_array']['HOST'];
+$username = $_SESSION['ini_array']['USER'];
+$password = $_SESSION['ini_array']['PASSWORD'];
+if (isset($_POST['database'])){
+    $_SESSION['database'] = $_POST['database'];
+}
+$dbconnect=mysqli_connect($hostname,$username,$password,$_SESSION['database']);
 ?>
 
 <html>
