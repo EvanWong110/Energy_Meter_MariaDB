@@ -2,10 +2,10 @@
     require "validador_acesso.php";   //protege o acesso a pagina para usuarios logados
     date_default_timezone_set('America/Sao_Paulo');      //configura a timezone
 
-
-    if(isset($_GET['begin_time']) && isset($_GET['end_time'])){      //exige preenchimento dos inputs de pesquisa
-        $time1 = (string) strtotime($_GET['begin_time']);            //selecao de itens pesquisados UnixTIMESTAMP
-        $time2 = (string) strtotime($_GET['end_time']);
+print_r($_SESSION);
+    if(isset($_SESSION['begin_time']) && isset($_SESSION['end_time'])){      //exige preenchimento dos inputs de pesquisa
+        $time1 = (string) strtotime($_SESSION['begin_time']);            //selecao de itens pesquisados UnixTIMESTAMP
+        $time2 = (string) strtotime($_SESSION['end_time']);
         $tamanho = (int) $time2 - (int) $time1;            
 
         $hostname = "192.168.0.251";
@@ -184,57 +184,6 @@ text-decoration:none;
           <a class="nav-link" href="logoff.php">SAIR</a>  <!--Executa logoff da página -->
       </ul>
     </nav>
-
-
-    <div>
-    <center>
-              <br><h5><br>Selecione a data para visualização: </h5>
-    </center>
-    <div class="col-15 d-flex justify-content-center">
-        <table border="0" width="500">
-            <tr>
-                <th>
-                    Inicio:
-                </th>
-                <th>
-                    Fim:
-                </th>
-            </tr>
-            <tr>
-                <form>
-                    <td>
-                        <input type="datetime-local" id="begin_time" name="begin_time" 
-                            <?php 
-                                if(isset($_GET['begin_time'])){
-                                    echo('value='.$_GET['begin_time'] ); //no caso de atualizar a pagina preenche automaticamente as input com os valores anteriores
-                                }
-                                else {
-                                    $date1hourago = strtotime('-1 hour');
-                                    echo('value='.date('Y-m-d\TH:j',$date1hourago)); //senao atualiza com a data atual
-                                }
-                            ?>                            
-                        >
-                    </td>
-                    <td>
-                            <input type="datetime-local" id="end_time" name="end_time" 
-                            <?php 
-                                if(isset($_GET['end_time'])){
-                                    echo('value='.$_GET['end_time'] ); 
-                                }
-                                else {
-                                echo('value='.date('Y-m-d\TH:j')); //senao atualiza com a data atual
-                                }
-                            ?>                            
-                            >
-                        </td>
-                        <td>
-                            <input type="submit" value="Pesquisar"></button>
-                        </td>
-                     </form>
-                </tr>
-            </table>
-        </div>                               
-    </div>
 
     <div style="float: right; width: 18%"  align="center">
         <br>

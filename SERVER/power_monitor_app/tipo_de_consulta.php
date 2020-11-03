@@ -1,9 +1,6 @@
 <?php
 require "validador_acesso.php";   //protege o acesso a pagina para usuarios logados
-
-function imprimir(){
- print ("oi");
-}
+date_default_timezone_set('America/Fortaleza');      //configura a timezone
 ?>
 
 <html>
@@ -41,66 +38,39 @@ print_r($_POST);
         </ul>
   </nav>
   <div>
-    <center>
-              <br><h5><br>Selecione a data para visualização: </h5>
-    </center>
-    <div class="col-15 d-flex justify-content-center">
-        <table border="0" width="500">
-            <tr>
-                <th>
-                    Inicio:
-                </th>
-                <th>
-                    Fim:
-                </th>
-            </tr>
-            <tr>
-                <form>
-                    <td>
-                        <input type="datetime-local" id="begin_time" name="begin_time" 
-                            <?php 
-                                if(isset($_GET['begin_time'])){
-                                    echo('value='.$_GET['begin_time'] ); //no caso de atualizar a pagina preenche automaticamente as input com os valores anteriores
-                                }
-                                else {
-                                    $date1hourago = strtotime('-1 hour');
-                                    echo('value='.date('Y-m-d\TH:j',$date1hourago)); //senao atualiza com a data atual
-                                }
-                            ?>                            
-                        >
-                    </td>
-                    <td>
-                            <input type="datetime-local" id="end_time" name="end_time" 
-                            <?php 
-                                if(isset($_GET['end_time'])){
-                                    echo('value='.$_GET['end_time'] ); 
-                                }
-                                else {
-                                echo('value='.date('Y-m-d\TH:j')); //senao atualiza com a data atual
-                                }
-                            ?>                            
-                            >
-                        </td>
-                        <td>
-                            <input type="submit" value="Pesquisar"></button>
-                        </td>
-                     </form>
-                </tr>
-            </table>
-        </div>                               
-    </div>
-
+       
     <div class="container" >    
         <div class="row">
-            <div class="card-login">
-                <div class="card">
+            <div class="card" style="width: 50rem;">      
+                <div class="card" >
+                    <center>
                     <div class="card-header">
-                        Selecione um tipo de consulta:
+                        Selecione um período e um tipo de consulta:
                     </div>
                     <div class="card-body">
-                        <form action="tipo_de_consulta.php" method="post">
-                            <input type="radio" id="detalhada" name="tipo" value="detalhada">
-                            <label for="detalhada">Consulta Detalhada</label><br>
+                        <form action="direciona.php" method="post">
+                            <div class="card-body"> 
+                                <div class="card-body"> 
+                                    Inicio:
+                                    <input type="datetime-local" id="begin_time" name="begin_time"
+                                    <?php 
+                                    $date1hourago = strtotime('-1 hour');
+                                    print('value='.date('Y-m-d\TH:i',$date1hourago));  #atualiza com a data atual
+                            ?>                      
+                                    > 
+                                </div>
+                                <div class="card-body"> 
+                                    Fim:
+                                    <input type="datetime-local" id="end_time" name="end_time"
+                                    <?php 
+                                    echo('value='.date('Y-m-d\TH:i'));  #atualiza com a data atual
+                            ?>                      
+ 
+                                    > 
+                                </div><br/>
+                            </div>
+                            <input type="radio" id="grafico" name="tipo" value="grafico">
+                            <label for="detalhada">Consulta por Gráfico</label><br>
                             <input type="radio" id="alarmes" name="tipo" value="alarmes">
                             <label for="alarmes">Consulta de Alarmes</label><br>
                             <input type="radio" id="basica" name="tipo" value="basica">
@@ -111,12 +81,14 @@ print_r($_POST);
                     </div>
                 </div>
             </div>
-            <div class="card-body">
-            <ul>
-                <li> Detalhada: Apresenta um gráfico do período com todas as amostras coletadas. </li>
-                <li> Consulta de Alarmes: Apresenta uma lista com todos os alarmes registrados no período. </li>
-                <li> Consulta Básica: Apresenta um resumo de consumo e log das falhas mais recentes. </li>
-            </ul>
+            <div class="card" style="width: 15rem;">
+                <div class="card-header">    
+                <ul>
+                    <li> Detalhada: Apresenta um gráfico do período com todas as amostras coletadas. </li>
+                    <li> Consulta de Alarmes: Apresenta uma lista com todos os alarmes registrados no período. </li>
+                    <li> Consulta Básica: Apresenta um resumo de consumo e log das falhas mais recentes. </li>
+                </ul>
+                </div>
             </div>
         </div>
     </div>
