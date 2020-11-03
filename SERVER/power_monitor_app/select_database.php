@@ -19,7 +19,8 @@ require "validador_acesso.php";   //protege o acesso a pagina para usuarios loga
 
   
 <?php
-        $ini_array_full = parse_ini_file($_SERVER['DOCUMENT_ROOT'].'/config.ini', true);
+        $projeto_root = (explode("SERVER",$_SERVER['DOCUMENT_ROOT']));
+        $ini_array_full = parse_ini_file($projeto_root[0].'/config.ini', true);
         $ini_array = $ini_array_full['MARIADB_DATABASE'];
         $_SESSION['ini_array'] = $ini_array;       
         $hostname = $ini_array['HOST'];

@@ -1,7 +1,6 @@
 <?php
     require "validador_acesso.php";   //protege o acesso a pagina para usuarios logados
     date_default_timezone_set('America/Sao_Paulo');      //configura a timezone
-    print_r($_SESSION);
     if(isset($_SESSION['begin_time']) && isset($_SESSION['end_time'])){      //exige preenchimento dos inputs de pesquisa
         $time1 = (string) strtotime($_SESSION['begin_time']);            //selecao de itens pesquisados UnixTIMESTAMP
         $time2 = (string) strtotime($_SESSION['end_time']);
