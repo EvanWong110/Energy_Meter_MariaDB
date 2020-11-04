@@ -286,6 +286,16 @@ bool ADE7753::CheckZeroCrossing(){
     return(Read16(STATUS_U) & ZX);
 }
 
+/*bool ADE7753::CheckZeroCrossingTimeout(){
+    return(Read16(STATUS_U) & ZXTO);
+}
+*/
+bool ADE7753::CheckZeroCrossingTimeOut(){
+    if (WaitZeroCross() != 0)
+        return 1;
+    return 0;
+}
+
 bool ADE7753::CheckTemperatureResults(){
     return(Read16(STATUS_U) & TEMP);
 }
@@ -310,10 +320,6 @@ bool ADE7753::CheckAparentEnergyOverflow(){
     return(Read16(STATUS_U) & VAEOF);
 }
 
-bool ADE7753::CheckZeroCrossingTimeout(){
-    return(Read16(STATUS_U) & ZXTO);
-}
-
 bool ADE7753::CheckPowerChangeToPos(){
     return(Read16(STATUS_U) & PPOS);
 }
@@ -321,6 +327,11 @@ bool ADE7753::CheckPowerChangeToPos(){
 bool ADE7753::CheckPowerChangeToNeg(){
     return(Read16(STATUS_U) & PNEG);
 }
+
+bool ADE7753::CheckResetEnds(){
+    return(Read16(STATUS_U) & RESET);
+}
+ 
 
 unsigned long ADE7753::ReadModeReg(){
     return Read16(MODE_U);  
@@ -334,9 +345,34 @@ unsigned long ADE7753::ResetStatusReg(){
     return Read16(RSTSTATUS_U);
 }
 
+long ADE7753::SetSAGLVL(long value){
+    Write8(SAGLVL_U, value);
+    return Read8(SAGLVL_U);        
+}
+
+long ADE7753::SetSAGCYC(long value){
+    Write8(SAGCYC_U, value);
+    return Read8(SAGCYC_U);        
+}
+
+long ADE7753::SetIPKLVL(long value){
+    Write8(IPKLVL_U, value);
+    return Read8(IPKLVL_U);        
+}
+
+long ADE7753::SetVPKLVL(long value){
+    Write8(VPKLVL_U, value);
+    return Read8(VPKLVL_U);        
+}
+
 long ADE7753::SetVRMSOS(long value){
     Write16(VRMSOS_S, value);
     return Read16(VRMSOS_S);        
+}
+
+long ADE7753::SetIRMSOS(long value){
+    Write16(IRMSOS_S, value);
+    return Read16(IRMSOS_S);        
 }
 
 unsigned long ADE7753::SetLINECYC(unsigned long value){
@@ -469,6 +505,13 @@ int ADE7753::GetDisplayPosition(){
     return display_position;
 }
 
+byte ADE7753::GetTemperature(){
+    SetBits(MODE_U, TEMPSEL);
+    ResetStatusReg();
+    while (!CheckTemperatureResults()) 1;
+    return Read8(TEMP_S)*1.34;    
+}
+    
 //------------------  
 //private
 //------------------

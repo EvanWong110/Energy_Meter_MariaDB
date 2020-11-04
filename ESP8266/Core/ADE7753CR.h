@@ -255,11 +255,11 @@
   #define WSMP   0b0000000000001000 // Indicates that new data is present in the waveform register. 
   #define ZX     0b0000000000010000 // This status bit is set to Logic 0 on the rising and falling edge of the the voltage waveform. 
   #define TEMP   0b0000000000100000 // Indicates that a temperature conversion result is available in the temperature register. 
-  #define RESET  0b0000000001000000
   /* Indicates the end of a reset (for both software or hardware reset). The corresponding enable bit has no
   function in the interrupt enable register, i.e., this status bit is set at the end of a reset, but it cannot
   be enabled to cause an interrupt. 
   */
+  #define RESET  0b0000000001000000
   #define AEOF   0b0000000010000000 // Indicates that the active energy register has overflowed. 
   #define PKV    0b0000000100000000 // Indicates that waveform sample from Channel 2 has exceeded the VPKLVL value. 
   #define PKI    0b0000001000000000 // Indicates that waveform sample from Channel 1 has exceeded the IPKLVL value. 
@@ -287,14 +287,16 @@
         float voltage = 0;
         float current = 0;
         float frequency = 0;
-        float active_power = 0;
-        float reactive_power = 0;
-        float aparent_power = 0;
-        float active_energy = 0;
-        float reactive_energy = 0;
-        float apparent_energy = 0;
         float FP = 0;
+        short active_power = 0;
+        short reactive_power = 0;
+        short aparent_power = 0;
+        short active_energy = 0;
+        short reactive_energy = 0;
+        short apparent_energy = 0;
         unsigned long timestamp = 0;
+        byte events = 0;
+        byte temp;
       } Measurement;
 
       void Init(int CSpin);
@@ -319,6 +321,7 @@
       void EnableCH2();
       void DisableSwap();
       void EnableSwap();
+
       /*
       0 -> 27.9 kSPS [Default]
       1 -> 14   kSPS
@@ -331,7 +334,8 @@
       2 -> 24 bits Channel 1
       3 -> 24 bits Channel 2
       */
-      void SelectWaveformDataSource(int datasource);  
+      void SelectWaveformDataSource(int datasource); 
+
       void EnableOnlyPositive();
       void DisableOnlyPositive();
       void EnableIRQActiveEnergyHalfFull();
@@ -366,24 +370,31 @@
       bool CheckSAG();
       bool CheckCycleEnergyAccumulationEnd();
       bool CheckNewWaveformData();
-      bool CheckZeroCrossing();  //returns 
+      bool CheckZeroCrossing();  //returns
+      bool CheckZeroCrossingTimeOut();  //returns 
+//      bool CheckZeroCrossingTimeout();
       bool CheckTemperatureResults();
       bool CheckActiveEnergyOverflow();
       bool CheckCH2VlvlPeek();
       bool CheckCH1IlvlPeek();
       bool CheckAparentEnergyHalfFull();
       bool CheckAparentEnergyOverflow();
-      bool CheckZeroCrossingTimeout();
       bool CheckPowerChangeToPos();
       bool CheckPowerChangeToNeg();
+      bool CheckResetEnds();
+      
+      long SetSAGLVL(long value);
+      long SetSAGCYC(long value);
+      long SetIPKLVL(long value);
+      long SetVPKLVL(long value);
+      long SetVRMSOS(long value);
+      long SetIRMSOS(long value);
+      unsigned long SetLINECYC(unsigned long value);
+
+      unsigned long ResetStatusReg();
       
       unsigned long ReadModeReg();
       unsigned long ReadStatusReg();
-      unsigned long ResetStatusReg();
-
-      long SetVRMSOS(long value);
-      unsigned long SetLINECYC(unsigned long value);
-      
       float ReadVRMS();
       float ReadIRMS();
       float ReadPERIOD(int CLKIN);
@@ -395,6 +406,7 @@
       void ReadFP(int half_line_cycles, float* power_factor);
       void DisplayBufferUpdate(Measurement* data, char dest, int view = 1, bool next = 0);
       int GetDisplayPosition();
+      byte GetTemperature();
       
     private:
       int _CSpin;

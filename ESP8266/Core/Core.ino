@@ -113,6 +113,16 @@ void loop() {
     ADE7753.ReadFP(120, &atual->FP);
     atual->active_power = atual->aparent_power * atual->FP;
     atual->reactive_power = atual->aparent_power * sin(acos(atual->FP));
+    ADE7753.ResetStatusReg();
+    atual->events |= ADE7753.CheckSAG();
+    atual->events |= ADE7753.CheckZeroCrossingTimeOut()<<1;
+    atual->events |= (ADE7753.CheckCH1IlvlPeek())<<2;
+    atual->events |= (ADE7753.CheckCH2VlvlPeek())<<3;
+    atual->events |= ADE7753.CheckPowerChangeToNeg()<<4;
+    atual->events |= ADE7753.CheckPowerChangeToPos()<<5;
+    atual->events |= ADE7753.CheckResetEnds()<<6;
+    atual->temp = ADE7753.GetTemperature();
+   
     //ADE7753.DisplayBufferUpdate((atual), (display_buffer), ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
     //OLED.ShowCompleteView(&display, display_buffer);  //shows buffer content on display 
 
@@ -121,18 +131,17 @@ void loop() {
         atual->active_energy = ADE7753.ReadandResetActiveEnergy();
         atual->apparent_energy = ADE7753.ReadandResetApparentEnergy();
         atual = &buff[ind];
+        atual->timestamp = setClock();
         Serial.println("half then full");
     }
 
     //Payload Upload
     if (threadTo(&last_upload_time, upload_interval)) {         
-          Serial.println("indice:");
-          Serial.println(ind);
           piscaled(1, 100);
-          atual->timestamp = setClock();
           atual->active_energy = ADE7753.ReadandResetActiveEnergy();
           atual->apparent_energy = ADE7753.ReadandResetApparentEnergy();
-         if (!offline_mode){
+          atual->timestamp = setClock();
+          if (!offline_mode){
               while (ind > 0){
                   Publisher.PublishMessage(dev_id, dev_abstract, *atual, &client, mqtt_topic);
                   ind--;

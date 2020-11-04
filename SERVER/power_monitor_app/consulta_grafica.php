@@ -41,7 +41,27 @@
     }
 #    echo '<pre>'; print_r($data); echo '</pre>';
 #    echo '<pre>'; print_r($data2); echo '</pre>';
-    ?>
+    $chart_array = $data;
+    $ind = 0;
+    $tam_chart = count($chart_array);
+    $qtd_remove = $tam_chart / 100;
+    if ($qtd_remove < 1) $qtd_remove = 1;
+    #print_r($chart_array);
+    while (1) {
+        if ($tam_chart < 100) 
+            break;
+        $ind++;
+        $ind++;
+        array_splice($chart_array, $ind, $qtd_remove);
+        
+        if ($ind >= $tam_chart){
+            $tam_chart = count($chart_array);
+            $ind = 0;
+            $qtd_remove = 1;
+      #      echo '<pre>'; print_r($chart_array); echo '</pre>';
+        }
+    }
+?>
 
 <html>
   <head>
@@ -72,7 +92,7 @@
                 data.addColumn('number', 'Pot. Ativa');
                 data.addColumn('number', 'Frequência');
                 data.addColumn('number', 'Fator de Potência');
-                data.addRows(<?php echo json_encode($data); ?>);  //adicao das linhas de dados presentes do array $data
+                data.addRows(<?php echo json_encode($chart_array); ?>);  //adicao das linhas de dados presentes do array $data
 
             var options = {   //opcoes de criação do grafico
                 title: 'Power Measurements',

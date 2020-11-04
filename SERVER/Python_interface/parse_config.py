@@ -2,7 +2,8 @@ import configparser
 import os.path
 
 ROOT_DIR = os.path.dirname(os.path.abspath(__file__)) # This is your Project Root
-CONFIG_PATH = os.path.join(ROOT_DIR, 'config.ini')  
+PROJECT_ROOT = ROOT_DIR.split('SERVER')
+CONFIG_PATH = os.path.join(PROJECT_ROOT[0], 'config.ini')  
 
 class ConfPacket:
     def __init__(self):
@@ -33,7 +34,7 @@ class ConfPacket:
 
 def main():
     configs = ConfPacket()
-    items = configs.load_config('MQTT, MQTT_TOPICS, DATABASE')
+    items = configs.load_config('MQTT, MQTT_TOPICS, MARIADB_DATABASE')
     print(items)
 
 if __name__ == '__main__':
