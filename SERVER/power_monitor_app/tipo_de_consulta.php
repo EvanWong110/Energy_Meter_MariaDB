@@ -73,11 +73,11 @@ $dbconnect=mysqli_connect($hostname,$username,$password,$_SESSION['database']);
                                 </div><br/>
                             </div>
                             <input type="radio" id="grafico" name="tipo" value="grafico">
-                            <label for="detalhada">Consulta por Gráfico</label><br>
+                            <label for="detalhada">Gráfico das informações do período</label><br>
                             <input type="radio" id="alarmes" name="tipo" value="alarmes">
-                            <label for="alarmes">Consulta de Alarmes</label><br>
-                            <input type="radio" id="basica" name="tipo" value="basica">
-                            <label for="basica">Consulta Básica</label>
+                            <label for="alarmes">Registro de alarmes/eventos no período</label><br>
+                            <input type="radio" id="basica" name="tipo" value="filtros">
+                            <label for="basica">Busca avançada com filtros</label>
                             <br/><br/>              
                             <button class="btn btn-lg btn-info btn-block" type="submit">Selecionar</button>
                         </form>

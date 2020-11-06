@@ -13,4 +13,11 @@ if ($_POST['tipo'] == 'alarmes') {
     header('Location: consulta_alarmes.php');
 }
 
+if ($_POST['tipo'] == 'filtros') {
+    $_SESSION['begin_time'] = $_POST['begin_time'];
+    $_SESSION['end_time'] = $_POST['end_time'];
+    header('Location: consulta_filtros.php');
+}
+
+
 ?>

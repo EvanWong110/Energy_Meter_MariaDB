@@ -37,5 +37,47 @@ print_r($_SESSION);
         </li>
         </ul>
   </nav>
+<?php
+  date_default_timezone_set('America/Sao_Paulo');      //configura a timezone
+    if(isset($_SESSION['begin_time']) && isset($_SESSION['end_time'])){      //exige preenchimento dos inputs de pesquisa
+        $time1 = (string) strtotime($_SESSION['begin_time']);            //selecao de itens pesquisados UnixTIMESTAMP
+        $time2 = (string) strtotime($_SESSION['end_time']);
+        $tamanho = (int) $time2 - (int) $time1;            
+
+        $hostname = $_SESSION['ini_array']['HOST'];
+        $username = $_SESSION['ini_array']['USER'];
+        $password = $_SESSION['ini_array']['PASSWORD'];
+        $database = $_SESSION['database'];
+
+        $dbconnect=mysqli_connect($hostname,$username,$password, $database);
+ 
+        if ($dbconnect->connect_error) {
+            die("Database connection failed: " . $dbconnect->connect_error);
+        }
+            $comando = "SELECT * FROM data WHERE timestamp BETWEEN $time1 AND $time2";
+            $query = mysqli_query($dbconnect, $comando)
+            or die (mysqli_error($dbconnect));                  
+    }
+      	$data=array();
+    if(isset($tamanho)){    
+        while ($row = mysqli_fetch_array($query)) {
+            $data[]=array(
+                (int) $row['timestamp'], 
+                (float) $row['tensao'], 
+                (float) $row['corrente'],
+                (float) $row['pot_re'],
+                (float) $row['pot_ap'],
+                (float) $row['pot_at'],
+                (float) $row['freq'],
+                (float) $row['FP']
+            );
+            $data2[]=array(
+                (float) $row['apparent_energy'],
+                (float) $row['active_energy']           
+            );
+        }
+    }
+  ?>
+
   </body>
 </html>
