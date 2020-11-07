@@ -493,12 +493,12 @@ float ADE7753::ReadandResetApparentEnergy(){
 }
 
 
-void ADE7753::ReadFP(int half_line_cycles, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
+void ADE7753::ReadFP(int half_line_cycles, float* power_factor, short* reactive_power){ //return active energy in Watt-Hour still needs calibration to work
     long active_value, reactive_value;
     unsigned long apparent_value;
     SetLINECYC(half_line_cycles);
     EnableAccumulationMode();
-    CheckandResetCycleEnergyAccumulationEnd();
+    delay(1);
     while (!CheckandResetCycleEnergyAccumulationEnd()) {
         delayMicroseconds(5);
     }
@@ -508,17 +508,20 @@ void ADE7753::ReadFP(int half_line_cycles, float* power_factor){ //return active
     active_value = Signed24toSigned32( Read24(LAENERGY_S) );      
     apparent_value = Read24(LVAENERGY_U);
     reactive_value = Signed24toSigned32( Read24(LVARENERGY_S) );     
-    Serial.println(reactive_value);
-    Serial.println(apparent_value);
-    Serial.println(active_value);
-    Serial.println("fim");
     DisableAccumulationMode();
-    active_value *=(0.827000/12.1031); //energy scales // W conversion
+    apparent_value = (apparent_value / 0.827) / 14,634946; //VA conversion
+    active_value = ((active_value*active_value) / apparent_value)  / 14,634946; //energy scales // W conversion
+    int reactive_signal = reactive_value / abs(reactive_value);
+    *reactive_power = (active_value / apparent_value) * reactive_signal;
+ 
+ //old values
+ /*   active_value *=(0.827000/12.1031); //energy scales // W conversion
     apparent_value /= 12.103100; //VA conversion
     reactive_value *=(0.204000 / (0.827*12.1031)); //energy scales / VAr conversion
+ */
     *power_factor =  ((active_value*1.000000) / apparent_value);
-    if (isnan(*power_factor)) *power_factor = 0;
-    if (*power_factor >= 1) *power_factor = 0.9999999999;
+//    if (isnan(*power_factor)) *power_factor = 0;
+//    if (*power_factor >= 1) *power_factor = 0.9999999999;
 }
 
 void ADE7753::DisplayBufferUpdate(Measurement* data, char dest, int view, boolean next)  

@@ -112,9 +112,9 @@ void loop() {
     atual->current = ADE7753.ReadIRMS()*20.09;  //fator reducao do sensor usado
     atual->aparent_power = atual->current * atual->voltage;
     atual->frequency = 1/(ADE7753.ReadPERIOD(3579545));
-    ADE7753.ReadFP(300, &atual->FP);
+    ADE7753.ReadFP(300, &atual->FP, &atual->reactive_power);
     atual->active_power = atual->aparent_power * atual->FP;
-    atual->reactive_power = atual->aparent_power * sin(acos(atual->FP));
+    // atual->reactive_power = atual->aparent_power * sin(acos(atual->FP));
     atual->events |= ADE7753.CheckandResetZeroCrossingTimeout();
     atual->events |= ADE7753.CheckandResetSAG()<<1;
     atual->events |= (ADE7753.CheckandResetCH1IlvlPeek())<<2;
