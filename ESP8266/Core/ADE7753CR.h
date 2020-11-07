@@ -366,21 +366,21 @@
       void DisablesIRQPowerChangeToPos();
       void EnablesIRQPowerChangeToNeg();
       void DisablesIRQPowerChangeToNeg();
-      bool CheckActiveEnergyHalfFull();
-      bool CheckSAG();
-      bool CheckCycleEnergyAccumulationEnd();
-      bool CheckNewWaveformData();
-      bool CheckZeroCrossing();  //returns
-      bool CheckZeroCrossingTimeOut();  //returns 
-//      bool CheckZeroCrossingTimeout();
-      bool CheckTemperatureResults();
-      bool CheckActiveEnergyOverflow();
-      bool CheckCH2VlvlPeek();
-      bool CheckCH1IlvlPeek();
-      bool CheckAparentEnergyHalfFull();
-      bool CheckAparentEnergyOverflow();
-      bool CheckPowerChangeToPos();
-      bool CheckPowerChangeToNeg();
+      bool CheckandResetActiveEnergyHalfFull();
+      bool CheckandResetSAG();
+      bool CheckandResetCycleEnergyAccumulationEnd();
+      bool CheckandResetNewWaveformData();
+      bool CheckandResetZeroCrossing();  //returns
+      bool CheckandResetZeroCrossingTimeout();  //returns 
+      bool CheckZeroCrossingError();
+      bool CheckandResetTemperatureResults();
+      bool CheckandResetActiveEnergyOverflow();
+      bool CheckandResetCH2VlvlPeek();
+      bool CheckandResetCH1IlvlPeek();
+      bool CheckandResetAparentEnergyHalfFull();
+      bool CheckandResetAparentEnergyOverflow();
+      bool CheckandResetPowerChangeToPos();
+      bool CheckandResetPowerChangeToNeg();
       bool CheckResetEnds();
       
       long SetSAGLVL(long value);
@@ -391,7 +391,7 @@
       long SetIRMSOS(long value);
       unsigned long SetLINECYC(unsigned long value);
 
-      unsigned long ResetStatusReg();
+      unsigned long ResetStatusReg();     
       
       unsigned long ReadModeReg();
       unsigned long ReadStatusReg();

@@ -1,15 +1,20 @@
 <?php
     require "validador_acesso.php";   //protege o acesso a pagina para usuarios logados
-    date_default_timezone_set('America/Sao_Paulo');      //configura a timezone
+    date_default_timezone_set('America/Fortaleza');      //configura a timezone
     if(isset($_SESSION['begin_time']) && isset($_SESSION['end_time'])){      //exige preenchimento dos inputs de pesquisa
         $time1 = (string) strtotime($_SESSION['begin_time']);            //selecao de itens pesquisados UnixTIMESTAMP
         $time2 = (string) strtotime($_SESSION['end_time']);
-        $tamanho = (int) $time2 - (int) $time1;            
+        $tamanho = (int) $time2 - (int) $time1;  
+        print($time1);
+        print("\n"); 
+        print($time2);         
 
         $hostname = $_SESSION['ini_array']['HOST'];
         $username = $_SESSION['ini_array']['USER'];
         $password = $_SESSION['ini_array']['PASSWORD'];
         $database = $_SESSION['database'];
+
+        print_r($_SESSION);
 
         $dbconnect=mysqli_connect($hostname,$username,$password, $database);
  
@@ -20,7 +25,7 @@
             $query = mysqli_query($dbconnect, $comando)
             or die (mysqli_error($dbconnect));                  
     }
-      	$data=array();
+          $data=array();
     if(isset($tamanho)){    
         while ($row = mysqli_fetch_array($query)) {
             $data[]=array(
@@ -39,6 +44,7 @@
             );
         }
     }
+    
 #    echo '<pre>'; print_r($data); echo '</pre>';
 #    echo '<pre>'; print_r($data2); echo '</pre>';
     $chart_array = $data;

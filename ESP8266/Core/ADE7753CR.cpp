@@ -266,72 +266,123 @@ void ADE7753::DisablesIRQPowerChangeToNeg(){
     UnsetBits(IRQEN_U, PNEG);   
 }
 
-bool ADE7753::CheckActiveEnergyHalfFull(){
-    return(Read16(STATUS_U) & AEHF);
+bool ADE7753::CheckandResetActiveEnergyHalfFull(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & AEHF;
+    Write16(STATUS_U, value & ~AEHF);
+    return check;
 }
 
-bool ADE7753::CheckSAG(){
-    return(Read16(STATUS_U) & SAG);
+bool ADE7753::CheckandResetSAG(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & SAG;
+    Write16(STATUS_U, value & ~SAG);
+    return check;
 }
 
-bool ADE7753::CheckCycleEnergyAccumulationEnd(){
-    return(Read16(STATUS_U) & CYCEND);
+bool ADE7753::CheckandResetCycleEnergyAccumulationEnd(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & CYCEND;
+    Write16(STATUS_U, value & ~CYCEND);
+    return check;
 }
 
-bool ADE7753::CheckNewWaveformData(){
-    return(Read16(STATUS_U) & WSMP);
+bool ADE7753::CheckandResetNewWaveformData(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & WSMP;
+    Write16(STATUS_U, value & ~WSMP);
+    return check;
 }
 
-bool ADE7753::CheckZeroCrossing(){
-    return(Read16(STATUS_U) & ZX);
+bool ADE7753::CheckandResetZeroCrossing(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & ZX;
+    Write16(STATUS_U, value & ~ZX);
+    return check;
 }
 
-/*bool ADE7753::CheckZeroCrossingTimeout(){
-    return(Read16(STATUS_U) & ZXTO);
+bool ADE7753::CheckandResetZeroCrossingTimeout(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & ZXTO;
+    Write16(STATUS_U, value & ~ZXTO);
+    return check;
 }
-*/
-bool ADE7753::CheckZeroCrossingTimeOut(){
+
+bool ADE7753::CheckZeroCrossingError(){
     if (WaitZeroCross() != 0)
         return 1;
     return 0;
 }
 
-bool ADE7753::CheckTemperatureResults(){
-    return(Read16(STATUS_U) & TEMP);
+bool ADE7753::CheckandResetTemperatureResults(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & TEMP;
+    Write16(STATUS_U, value & ~TEMP);
+    return check;
 }
 
-bool ADE7753::CheckActiveEnergyOverflow(){
-    return(Read16(STATUS_U) & AEOF);
+bool ADE7753::CheckandResetActiveEnergyOverflow(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & AEOF;
+    Write16(STATUS_U, value & ~AEOF);
+    return check;
 }
 
-bool ADE7753::CheckCH2VlvlPeek(){
-    return(Read16(STATUS_U) & PKV);
+bool ADE7753::CheckandResetCH2VlvlPeek(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & PKV;
+    Write16(STATUS_U, value & ~PKV);
+    return check;
 }
 
-bool ADE7753::CheckCH1IlvlPeek(){
-    return(Read16(STATUS_U) & PKI);
+bool ADE7753::CheckandResetCH1IlvlPeek(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & PKI;
+    Write16(STATUS_U, value & ~PKI);
+    return check;
 }
 
-bool ADE7753::CheckAparentEnergyHalfFull(){
-    return(Read16(STATUS_U) & VAEHF);
+bool ADE7753::CheckandResetAparentEnergyHalfFull(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & VAEHF;
+    Write16(STATUS_U, value & ~VAEHF);
+    return check;
 }
 
-bool ADE7753::CheckAparentEnergyOverflow(){
-    return(Read16(STATUS_U) & VAEOF);
+bool ADE7753::CheckandResetAparentEnergyOverflow(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & VAEOF;
+    Write16(STATUS_U, value & ~VAEOF);
+    return check;
 }
 
-bool ADE7753::CheckPowerChangeToPos(){
-    return(Read16(STATUS_U) & PPOS);
+bool ADE7753::CheckandResetPowerChangeToPos(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & PPOS;
+    Write16(STATUS_U, value & ~PPOS);
+    if (check){
+        Serial.println("Potency changed to Pos");
+    }
+    return(check);
 }
 
-bool ADE7753::CheckPowerChangeToNeg(){
-    return(Read16(STATUS_U) & PNEG);
+bool ADE7753::CheckandResetPowerChangeToNeg(){
+    unsigned long value = Read16(STATUS_U);
+    bool check = value & PNEG;
+    Write16(STATUS_U, value & ~PNEG);
+    if (check){
+        Serial.println("Potency changed to Neg");
+    }
+    return(check);
 }
 
 bool ADE7753::CheckResetEnds(){
-    return(Read16(STATUS_U) & RESET);
+    bool check = Read16(STATUS_U) & RESET;
+    if (check){
+        Serial.println("Reseting...");
+    }
+    return(check);
 }
- 
 
 unsigned long ADE7753::ReadModeReg(){
     return Read16(MODE_U);  
@@ -342,7 +393,7 @@ unsigned long ADE7753::ReadStatusReg(){
 }
 
 unsigned long ADE7753::ResetStatusReg(){
-    return Read16(RSTSTATUS_U);
+    return(Read16(RSTSTATUS_U));
 }
 
 long ADE7753::SetSAGLVL(long value){
@@ -444,22 +495,27 @@ float ADE7753::ReadandResetApparentEnergy(){
 
 void ADE7753::ReadFP(int half_line_cycles, float* power_factor){ //return active energy in Watt-Hour still needs calibration to work
     long active_value, reactive_value;
-    long apparent_value;
+    unsigned long apparent_value;
     SetLINECYC(half_line_cycles);
     EnableAccumulationMode();
-    ResetStatusReg();
-    delay(17);
-    while (!CheckCycleEnergyAccumulationEnd()) {
+    CheckandResetCycleEnergyAccumulationEnd();
+    while (!CheckandResetCycleEnergyAccumulationEnd()) {
         delayMicroseconds(5);
     }
-
+    while (!CheckandResetCycleEnergyAccumulationEnd()) {
+        delayMicroseconds(5);
+    }
     active_value = Signed24toSigned32( Read24(LAENERGY_S) );      
     apparent_value = Read24(LVAENERGY_U);
-    reactive_value = Signed24toSigned32( Read24(LVARENERGY_S) );    
-    
-    active_value *=(0.827/12.1031); //energy scales // W conversion
-    apparent_value /= 12.1031; //VA conversion
-    reactive_value *=(0.204 / (0.827*12.1031)); //energy scales / VAr conversion
+    reactive_value = Signed24toSigned32( Read24(LVARENERGY_S) );     
+    Serial.println(reactive_value);
+    Serial.println(apparent_value);
+    Serial.println(active_value);
+    Serial.println("fim");
+    DisableAccumulationMode();
+    active_value *=(0.827000/12.1031); //energy scales // W conversion
+    apparent_value /= 12.103100; //VA conversion
+    reactive_value *=(0.204000 / (0.827*12.1031)); //energy scales / VAr conversion
     *power_factor =  ((active_value*1.000000) / apparent_value);
     if (isnan(*power_factor)) *power_factor = 0;
     if (*power_factor >= 1) *power_factor = 0.9999999999;
@@ -506,9 +562,9 @@ int ADE7753::GetDisplayPosition(){
 }
 
 byte ADE7753::GetTemperature(){
+    CheckandResetTemperatureResults();
     SetBits(MODE_U, TEMPSEL);
-    ResetStatusReg();
-    while (!CheckTemperatureResults()) 1;
+    while (!CheckandResetTemperatureResults()) 1;
     return Read8(TEMP_S)*1.34;    
 }
     
@@ -596,8 +652,8 @@ void ADE7753::Write16(char reg, unsigned long value){
 int ADE7753::WaitZeroCross(){  //returns 0 when ZeroCross
     boolean value = 0;
     unsigned long conta_millis = millis();
-    ResetStatusReg();
-    while (!CheckZeroCrossing()) {
+    CheckandResetZeroCrossing();
+    while (!CheckandResetZeroCrossing()) {
         if (millis() > (conta_millis+100)){
             Serial.println("ZX ERROR");
             value = 1;

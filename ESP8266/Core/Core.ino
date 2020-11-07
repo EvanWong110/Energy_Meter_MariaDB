@@ -1,3 +1,4 @@
+
  /* Nome do arquivo: Core.ino
  * Este é o arquivo main() que possui o setup e o loop principal do programa
  * 
@@ -67,6 +68,7 @@ unsigned long setClock() {
   configTime(0 * 3600, 0, "pool.ntp.org", "time.nist.gov");
   Serial.println("Getting NTP time sync... ");
   time_t now = time(nullptr);
+  Serial.print(asctime(gmtime(&now)));
   return now;  
 }
 
@@ -110,23 +112,21 @@ void loop() {
     atual->current = ADE7753.ReadIRMS()*20.09;  //fator reducao do sensor usado
     atual->aparent_power = atual->current * atual->voltage;
     atual->frequency = 1/(ADE7753.ReadPERIOD(3579545));
-    ADE7753.ReadFP(120, &atual->FP);
+    ADE7753.ReadFP(300, &atual->FP);
     atual->active_power = atual->aparent_power * atual->FP;
     atual->reactive_power = atual->aparent_power * sin(acos(atual->FP));
-    ADE7753.ResetStatusReg();
-    atual->events |= ADE7753.CheckSAG();
-    atual->events |= ADE7753.CheckZeroCrossingTimeOut()<<1;
-    atual->events |= (ADE7753.CheckCH1IlvlPeek())<<2;
-    atual->events |= (ADE7753.CheckCH2VlvlPeek())<<3;
-    atual->events |= ADE7753.CheckPowerChangeToNeg()<<4;
-    atual->events |= ADE7753.CheckPowerChangeToPos()<<5;
-    atual->events |= ADE7753.CheckResetEnds()<<6;
+    atual->events |= ADE7753.CheckandResetZeroCrossingTimeout();
+    atual->events |= ADE7753.CheckandResetSAG()<<1;
+    atual->events |= (ADE7753.CheckandResetCH1IlvlPeek())<<2;
+    atual->events |= (ADE7753.CheckandResetCH2VlvlPeek())<<3;
+    atual->events |= ADE7753.CheckandResetPowerChangeToNeg()<<4;
+    atual->events |= ADE7753.CheckandResetPowerChangeToPos()<<5;
     atual->temp = ADE7753.GetTemperature();
    
     //ADE7753.DisplayBufferUpdate((atual), (display_buffer), ADE7753.GetDisplayPosition(), !digitalRead(SW_PIN)); //salva dados no buffer "Parameter=value"
     //OLED.ShowCompleteView(&display, display_buffer);  //shows buffer content on display 
 
-    if ( ADE7753.CheckActiveEnergyHalfFull() || ADE7753.CheckAparentEnergyHalfFull() ){
+    if ( ADE7753.CheckandResetActiveEnergyHalfFull() || ADE7753.CheckandResetAparentEnergyHalfFull() ){
         ind++;
         atual->active_energy = ADE7753.ReadandResetActiveEnergy();
         atual->apparent_energy = ADE7753.ReadandResetApparentEnergy();

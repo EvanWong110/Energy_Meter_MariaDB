@@ -38,7 +38,6 @@ print_r($_SESSION);
         </ul>
   </nav>
 <?php
-  date_default_timezone_set('America/Sao_Paulo');      //configura a timezone
     if(isset($_SESSION['begin_time']) && isset($_SESSION['end_time'])){      //exige preenchimento dos inputs de pesquisa
         $time1 = (string) strtotime($_SESSION['begin_time']);            //selecao de itens pesquisados UnixTIMESTAMP
         $time2 = (string) strtotime($_SESSION['end_time']);
@@ -54,7 +53,7 @@ print_r($_SESSION);
         if ($dbconnect->connect_error) {
             die("Database connection failed: " . $dbconnect->connect_error);
         }
-            $comando = "SELECT * FROM data WHERE timestamp BETWEEN $time1 AND $time2";
+            $comando = "SELECT * FROM data WHERE timestamp BETWEEN $time1 AND $time2 and events != '0'";
             $query = mysqli_query($dbconnect, $comando)
             or die (mysqli_error($dbconnect));                  
     }
@@ -77,6 +76,7 @@ print_r($_SESSION);
             );
         }
     }
+    print_r($data);
   ?>
 
   </body>

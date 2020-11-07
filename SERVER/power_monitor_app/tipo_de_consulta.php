@@ -72,12 +72,12 @@ $dbconnect=mysqli_connect($hostname,$username,$password,$_SESSION['database']);
                                     > 
                                 </div><br/>
                             </div>
-                            <input type="radio" id="grafico" name="tipo" value="grafico">
+                            <input type="radio" id="grafico" name="tipo" value="grafico" checked>
                             <label for="detalhada">Gráfico das informações do período</label><br>
                             <input type="radio" id="alarmes" name="tipo" value="alarmes">
                             <label for="alarmes">Registro de alarmes/eventos no período</label><br>
                             <input type="radio" id="basica" name="tipo" value="filtros">
-                            <label for="basica">Busca avançada com filtros</label>
+                            <label for="filtros">Busca avançada com filtros</label>
                             <br/><br/>              
                             <button class="btn btn-lg btn-info btn-block" type="submit">Selecionar</button>
                         </form>
